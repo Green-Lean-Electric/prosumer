@@ -23,4 +23,8 @@ const routes = {
     ),
 };
 
-server.createServer(routes, port);
+const staticFiles = {
+    '/test': '/files/file.txt'
+};
+
+server.createServer(__dirname, staticFiles, routes, port);
