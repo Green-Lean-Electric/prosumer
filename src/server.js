@@ -25,7 +25,12 @@ const routes = {
 
 const staticFiles = {
     '/test': '/files/file.txt',
-    '' : '/front/index.html'
+    '/' : '/front/index.html',
+    '/' : '/front/js/sb-admin-2.min.js',
+    '/' : '/front/css/sb-admin-2.min.css',
+    '/' : '/front/vendor/jquery/jquery.min.js',
+    '/' : '/front/vendor/bootstrap/js/bootstrap.bundle.min.js',
+    '/' : '/front/vendor/jquery-easing/jquery.easing.min.js',
 };
 
 server.createServer(__dirname, staticFiles, routes, port);
