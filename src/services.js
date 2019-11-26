@@ -23,12 +23,17 @@ exports.connectProsumer = function (email, password) {
     };
     const token = generateToken();
     const updateOperation = {$set: {token}};
-
+console.log(prosumer);
     return database
         .updateOne(undefined, databaseName, collectionName, prosumer, updateOperation)
-        .then(() => {
-            console.log(`User connected with token '${token}'`);
-            return token;
+        .then((nModified) => {
+            if(nModified != 0){
+                console.log(`User connected with token '${token}'`);
+                return token;
+            }else{
+                console.log(`User not found`);
+                return false;
+            }
         });
 };
 
@@ -45,6 +50,21 @@ exports.disconnectProsumer = function (token) {
         .then(() => {
             console.log(`User connected with token '${token}' has been disconnected`);
             return token;
+        });
+};
+
+exports.isProsumerLogged = function (token) {
+    const databaseName = DATABASE_NAME;
+    const collectionName = 'prosumers';
+    const prosumer = {
+        token
+    };
+
+    return database
+        .find(undefined, databaseName, collectionName, prosumer)
+        .then((results) => {
+            console.log(results.length);
+            return true;
         });
 };
 

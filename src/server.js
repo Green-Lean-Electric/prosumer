@@ -23,6 +23,9 @@ const routes = {
     '/getProsumerElectricityConsumption': request => service.getProsumerElectricityConsumption(
         server.getParam(request, 'token')
     ),
+    '/isProsumerLogged': request => service.isProsumerLogged(
+        server.getParam(request, 'token')
+    ),
 };
 
 const staticFiles = {
