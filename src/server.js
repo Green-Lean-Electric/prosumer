@@ -24,7 +24,8 @@ const routes = {
 };
 
 const staticFiles = {
-    '/test': '/files/file.txt'
+    '/test': '/files/file.txt',
+    '' : '/front/index.html'
 };
 
 server.createServer(__dirname, staticFiles, routes, port);
