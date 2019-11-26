@@ -12,8 +12,7 @@ const routes = {
         server.getParam(request, 'password')
     ),
     '/prosumerLogin': request => service.connectProsumer(
-        server.getParam(request, 'email'),
-        server.getParam(request, 'password')
+        parseParams(request)
     ),
     '/prosumerLogout': request => service.disconnectProsumer(
         server.getParam(request, 'token')
@@ -32,3 +31,13 @@ const staticFiles = {
 };
 
 server.createServer(staticFiles, routes, port, [__dirname + "/front"]);
+
+function parseParams(req){
+    let data  = [];
+    req.on('data', chunk => {
+        data.push(chunk);
+    });
+    req.on('end', () => {
+        return JSON.parse(data);
+    });
+}

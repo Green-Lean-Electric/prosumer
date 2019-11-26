@@ -82,17 +82,19 @@
             function validateForm() {
                 var email = document.loginform.email.value;
                 var pw = document.loginform.password.value;
-
+                var data = { 
+                    email: email, 
+                    password: pw
+                };
                 // call API
                 $.ajax({
                     type: 'POST',
                     url: 'http://localhost:8081/prosumerLogin',
-                    data: { 
-                            'email': email, 
-                            'password': pw
-                    },
+                    dataType: 'json',
+                    contentType: 'application/json',
+                    data: JSON.stringify(data),
                     success: function(token){
-                            
+                            alert(token);
                         if (token) {
                             window.localStorage.setItem('token', token);
                             window.location = "home.html";
@@ -101,6 +103,8 @@
                             alert ("Login was unsuccessful, please check your email and password");
                             return false;
                         }
+                    },error: function() {
+                        alert('Error occured');
                     }
                 });
             }

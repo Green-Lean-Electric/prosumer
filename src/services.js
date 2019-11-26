@@ -13,18 +13,19 @@ exports.insertProsumer = function (email, password) {
         .insertOne(undefined, databaseName, collectionName, prosumer);
 };
 
-exports.connectProsumer = function (email, password) {
+exports.connectProsumer = function (data) {
     const databaseName = DATABASE_NAME;
     const collectionName = 'prosumers';
 
+console.log(data);
     const prosumer = {
-        email,
-        password
+        data.email,
+        data.password
     };
     const token = generateToken();
     const updateOperation = {$set: {token}};
 
-console.log(prosumer);
+//console.log(prosumer);
 
     return database
         .updateOne(undefined, databaseName, collectionName, prosumer, updateOperation)
