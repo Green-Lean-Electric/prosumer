@@ -94,7 +94,6 @@
                     contentType: 'application/json',
                     data: JSON.stringify(data),
                     success: function(token){
-                            alert(token);
                         if (token) {
                             window.localStorage.setItem('token', token);
                             window.location = "home.html";
@@ -103,8 +102,6 @@
                             alert ("Login was unsuccessful, please check your email and password");
                             return false;
                         }
-                    },error: function() {
-                        alert('Error occured');
                     }
                 });
             }

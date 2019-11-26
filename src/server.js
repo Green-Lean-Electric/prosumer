@@ -11,9 +11,7 @@ const routes = {
         server.getParam(request, 'email'),
         server.getParam(request, 'password')
     ),
-    '/prosumerLogin': request => service.connectProsumer(
-        parseParams(request)
-    ),
+    '/prosumerLogin': request => parseParams(request).then( data => service.connectProsumer(data)),
     '/prosumerLogout': request => service.disconnectProsumer(
         server.getParam(request, 'token')
     ),
@@ -37,7 +35,9 @@ function parseParams(req){
     req.on('data', chunk => {
         data.push(chunk);
     });
-    req.on('end', () => {
-        return JSON.parse(data);
+    return new Promise((resolve, reject) => {
+        req.on('end', () => {
+            resolve(JSON.parse(data));
+        });
     });
 }

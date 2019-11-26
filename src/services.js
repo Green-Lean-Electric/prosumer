@@ -17,22 +17,15 @@ exports.connectProsumer = function (data) {
     const databaseName = DATABASE_NAME;
     const collectionName = 'prosumers';
 
-console.log(data);
-    const prosumer = {
-        data.email,
-        data.password
-    };
     const token = generateToken();
     const updateOperation = {$set: {token}};
 
-//console.log(prosumer);
-
     return database
-        .updateOne(undefined, databaseName, collectionName, prosumer, updateOperation)
+        .updateOne(undefined, databaseName, collectionName, data, updateOperation)
         .then((nModified) => {
             if(nModified != 0){
                 console.log(`User connected with token '${token}'`);
-                return token;
+                return JSON.stringify({ token });
             }else{
                 console.log(`User not found`);
                 return false;
