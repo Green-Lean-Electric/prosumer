@@ -13,7 +13,7 @@ const routes = {
     ),
     '/prosumerLogin': request => service.connectProsumer(
         server.getParam(request, 'email'),
-        server.getParam(request, 'pwd')
+        server.getParam(request, 'password')
     ),
     '/prosumerLogout': request => service.disconnectProsumer(
         server.getParam(request, 'token')
