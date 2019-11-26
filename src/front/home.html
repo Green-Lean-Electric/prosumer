@@ -445,7 +445,19 @@
 
 		<script>
 			$( document ).ready(function() {
-			    console.log( window.localStorage.getItem('token') );
+				$.ajax({
+                    type: 'GET',
+                    url: 'http://localhost:8081/prosumerIsLogged',
+                    data: { 
+                            'token': window.localStorage.getItem('token')
+                    },
+                    success: function(islogged){
+                            
+                        if (!islogged) {
+                            window.location = "index.html";
+                        }
+                    }
+                });
 			});    
 		</script>
 
