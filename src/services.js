@@ -23,7 +23,9 @@ exports.connectProsumer = function (email, password) {
     };
     const token = generateToken();
     const updateOperation = {$set: {token}};
+
 console.log(prosumer);
+
     return database
         .updateOne(undefined, databaseName, collectionName, prosumer, updateOperation)
         .then((nModified) => {
