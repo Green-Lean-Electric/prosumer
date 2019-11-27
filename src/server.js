@@ -15,7 +15,7 @@ const routes = {
     '/getProsumerElectricityConsumption': request => service.getProsumerElectricityConsumption(
         server.getParam(request, 'token')
     ),
-    '/isProsumerLogged': request => service.isProsumerLogged(
+    '/getProsumerLogged': request => service.getProsumerLogged(
         server.getParam(request, 'token')
     ),
     '/uploadPicture': request => parseParams(request).then( data => service.uploadProsumerPicture(data)),

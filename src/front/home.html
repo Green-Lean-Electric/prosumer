@@ -64,7 +64,7 @@
 
 						<!-- Page Heading -->
 						<div class="d-sm-flex align-items-center justify-content-between mb-4">
-							<h1 class="h3 mb-0 text-gray-800">Dashboard</h1>
+							<h1 id="accountTitle" class="h3 mb-0 text-gray-800">Dashboard</h1>
 						</div>
 
 						<!-- Content Row -->
@@ -447,12 +447,15 @@
 			$( document ).ready(function() {
 				$.ajax({
                     type: 'GET',
-                    url: 'http://localhost:8081/isProsumerLogged?token=' + window.localStorage.getItem('token'),
+                    url: 'http://localhost:8081/getProsumerLogged?token=' + window.localStorage.getItem('token'),
                     dataType: 'json',
                     contentType: 'application/json',
-                    success: function(islogged){
-                        if (!islogged) {
+                    success: function(prosumer){
+                    	console.log(prosumer);
+                        if (prosumer == false) {
                             window.location = "index.html";
+                        } else {
+                        	$('#accountTitle').html("Dashboard - " + prosumer.email);
                         }
                     }
                 });

@@ -48,7 +48,7 @@ exports.disconnectProsumer = function (token) {
         });
 };
 
-exports.isProsumerLogged = function (token) {
+exports.getProsumerLogged = function (token) {
     const databaseName = DATABASE_NAME;
     const collectionName = 'prosumers';
     const prosumer = {
@@ -58,8 +58,13 @@ exports.isProsumerLogged = function (token) {
     return database
         .find(undefined, databaseName, collectionName, prosumer)
         .then((results) => {
-            if(results.length > 0)
-                return true;
+            if(results.length == 1){
+                var response = {
+                    "email" : results[0].email,
+                    "picture" : results[0].picture
+                };
+                return response;
+            }
             return false;
         });
 };
