@@ -7,9 +7,9 @@ const DATABASE_NAME = 'greenleanelectrics';
 exports.insertProsumer = function (data) {
     const databaseName = DATABASE_NAME;
     const collectionName = 'prosumers';
-console.log(data);
+
     return database
-        .insertOne(undefined, databaseName, collectionName, data);
+        .insertOne(undefined, databaseName, collectionName, JSON.parse(data));
 };
 
 exports.connectProsumer = function (data) {
@@ -20,7 +20,7 @@ exports.connectProsumer = function (data) {
     const updateOperation = {$set: {token}};
 
     return database
-        .updateOne(undefined, databaseName, collectionName, data, updateOperation)
+        .updateOne(undefined, databaseName, collectionName, JSON.parse(data), updateOperation)
         .then((nModified) => {
             if(nModified != 0){
                 console.log(`User connected with token '${token}'`);
@@ -61,6 +61,25 @@ exports.isProsumerLogged = function (token) {
             if(results.length > 0)
                 return true;
             return false;
+        });
+};
+
+exports.uploadProsumerPicture = function (data) {
+    const databaseName = DATABASE_NAME;
+    const collectionName = 'prosumers';
+//console.log(data);
+
+//TODO: Data on sait pas trop ce que c'est et on sait pas comment le convertir ni comment save l'image sur le serv
+    const prosumer = {
+        token : "d99755780ffbd544e25b91f398d0393b" //TODO a passer dans la requete
+    };
+
+    const updateOperation = {$set: {picture: data}};
+
+    return database
+        .updateOne(undefined, databaseName, collectionName, prosumer, updateOperation)
+        .then(() => {
+            return true;
         });
 };
 

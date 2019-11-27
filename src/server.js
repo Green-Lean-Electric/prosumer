@@ -18,6 +18,7 @@ const routes = {
     '/isProsumerLogged': request => service.isProsumerLogged(
         server.getParam(request, 'token')
     ),
+    '/uploadPicture': request => parseParams(request).then( data => service.uploadProsumerPicture(data)),
 };
 
 const staticFiles = {
@@ -33,10 +34,10 @@ function parseParams(req){
     let data  = [];
     req.on('data', chunk => {
         data.push(chunk);
-    });console.log(data);
+    });
     return new Promise((resolve, reject) => {
         req.on('end', () => {
-            resolve(JSON.parse(data));
+            resolve(data);
         });
     });
 }
