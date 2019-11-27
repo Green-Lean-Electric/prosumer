@@ -4,13 +4,12 @@ const querystring = require('querystring');
 
 const DATABASE_NAME = 'greenleanelectrics';
 
-exports.insertProsumer = function (email, password) {
+exports.insertProsumer = function (data) {
     const databaseName = DATABASE_NAME;
     const collectionName = 'prosumers';
-    const prosumer = {email, password};
-
+console.log(data);
     return database
-        .insertOne(undefined, databaseName, collectionName, prosumer);
+        .insertOne(undefined, databaseName, collectionName, data);
 };
 
 exports.connectProsumer = function (data) {
@@ -19,10 +18,10 @@ exports.connectProsumer = function (data) {
 
     const token = generateToken();
     const updateOperation = {$set: {token}};
-console.log(data);
+
     return database
         .updateOne(undefined, databaseName, collectionName, data, updateOperation)
-        .then((nModified) => {console.log(nModified);
+        .then((nModified) => {
             if(nModified != 0){
                 console.log(`User connected with token '${token}'`);
                 return JSON.stringify({ token });

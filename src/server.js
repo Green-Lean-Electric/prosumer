@@ -7,10 +7,7 @@ const port = require('../../utils/src/configuration.js')
     .port;
 
 const routes = {
-    '/prosumerSignUp': request => service.insertProsumer(
-        server.getParam(request, 'email'),
-        server.getParam(request, 'password')
-    ),
+    '/prosumerSignUp': request => parseParams(request).then( data => service.insertProsumer(data)),
     '/prosumerLogin': request => parseParams(request).then( data => service.connectProsumer(data)),
     '/prosumerLogout': request => service.disconnectProsumer(
         server.getParam(request, 'token')
@@ -25,7 +22,9 @@ const routes = {
 
 const staticFiles = {
     '/test': __dirname + '/files/file.txt',
-    '/': __dirname + '/front/index.html'
+    '/': __dirname + '/front/index.html',
+    '/home.html': __dirname + '/front/home.html',
+    '/register.html': __dirname + '/front/register.html'
 };
 
 server.createServer(staticFiles, routes, port, [__dirname + "/front"]);

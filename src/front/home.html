@@ -325,7 +325,7 @@
 					<div class="modal-body">Select "Logout" below if you are ready to end your current session.</div>
 					<div class="modal-footer">
 						<button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
-						<a class="btn btn-primary" href="login.html">Logout</a>
+						<a class="btn btn-primary" id="logout" style="color: #fff;cursor:pointer;">Logout</a>
 					</div>
 				</div>
 			</div>
@@ -352,7 +352,7 @@
 					</div>
 					<div class="modal-footer">
 						<button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
-						<a class="btn btn-primary" href="login.html">Validate</a>
+						<a class="btn btn-primary"  style="color: #fff;cursor:pointer;">Validate</a>
 					</div>
 				</div>
 			</div>
@@ -386,7 +386,7 @@
 					</div>
 					<div class="modal-footer">
 						<button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
-						<a class="btn btn-primary" href="login.html">Validate</a>
+						<a class="btn btn-primary" style="color: #fff;cursor:pointer;" >Validate</a>
 					</div>
 				</div>
 			</div>
@@ -420,7 +420,7 @@
 					</div>
 					<div class="modal-footer">
 						<button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
-						<a class="btn btn-primary" href="login.html">Validate</a>
+						<a class="btn btn-primary" style="color: #fff;cursor:pointer;">Validate</a>
 					</div>
 				</div>
 			</div>
@@ -456,6 +456,19 @@
                         }
                     }
                 });
+
+                $('#logout').on('click', function(){
+                	$.ajax({
+	                    type: 'GET',
+	                    url: 'http://localhost:8081/prosumerLogout?token=' + window.localStorage.getItem('token'),
+	                    dataType: 'json',
+	                    contentType: 'application/json',
+	                    success: function(){
+	                    	alert("You are well logged out !");
+	                        window.location = "index.html";
+	                    }
+	                });
+                })
 			});    
 		</script>
 
