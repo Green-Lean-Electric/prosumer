@@ -19,10 +19,10 @@ exports.connectProsumer = function (data) {
 
     const token = generateToken();
     const updateOperation = {$set: {token}};
-
+console.log(data);
     return database
         .updateOne(undefined, databaseName, collectionName, data, updateOperation)
-        .then((nModified) => {
+        .then((nModified) => {console.log(nModified);
             if(nModified != 0){
                 console.log(`User connected with token '${token}'`);
                 return JSON.stringify({ token });
@@ -59,8 +59,9 @@ exports.isProsumerLogged = function (token) {
     return database
         .find(undefined, databaseName, collectionName, prosumer)
         .then((results) => {
-            console.log(results.length);
-            return true;
+            if(results.length > 0)
+                return true;
+            return false;
         });
 };
 

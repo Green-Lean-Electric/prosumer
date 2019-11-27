@@ -445,17 +445,12 @@
 
 		<script>
 			$( document ).ready(function() {
-                var data = { 
-                    'token': window.localStorage.getItem('token')
-                };
 				$.ajax({
                     type: 'GET',
-                    url: 'http://localhost:8081/isProsumerLogged',
+                    url: 'http://localhost:8081/isProsumerLogged?token=' + window.localStorage.getItem('token'),
                     dataType: 'json',
                     contentType: 'application/json',
-                    data: JSON.stringify(data),
                     success: function(islogged){
-                        alert(islogged);
                         if (!islogged) {
                             window.location = "index.html";
                         }

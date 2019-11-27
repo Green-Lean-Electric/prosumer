@@ -33,7 +33,7 @@
                         <div class="card-body p-0">
                             <!-- Nested Row within Card Body -->
                             <div class="row">
-                                <div class="col-lg-6 d-none d-lg-block bg-login-image"></div>
+                                <div class="col-lg-6 d-none d-lg-block bg-login-image" style="background-image: url('https://www.mpw.org/webres/Image/electric/electricity.jpg')"></div>
                                 <div class="col-lg-6">
                                     <div class="p-5">
                                         <div class="text-center">
@@ -93,9 +93,10 @@
                     dataType: 'json',
                     contentType: 'application/json',
                     data: JSON.stringify(data),
-                    success: function(token){
-                        if (token) {
-                            window.localStorage.setItem('token', token);
+                    success: function(response){
+                        var object = JSON.parse(response);
+                        if (object.token) {
+                            window.localStorage.setItem('token', object.token);
                             window.location = "home.html";
                         }
                         else {

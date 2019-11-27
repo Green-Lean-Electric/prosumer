@@ -34,7 +34,7 @@ function parseParams(req){
     let data  = [];
     req.on('data', chunk => {
         data.push(chunk);
-    });
+    });console.log(data);
     return new Promise((resolve, reject) => {
         req.on('end', () => {
             resolve(JSON.parse(data));
