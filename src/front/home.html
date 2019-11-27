@@ -241,7 +241,7 @@
 							              		<div class="row no-gutters align-items-center">
 							                		<div class="col mr-2">
 							                  			<div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Current Wind</div>
-							                  			<div class="h5 mb-0 font-weight-bold text-gray-800">18 km/h</div>
+							                  			<div id="currentWind" class="h5 mb-0 font-weight-bold text-gray-800">18 km/h</div>
 							                		</div>
 							                		<div class="col-auto">
 							                  			<i class="fas fa-wind fa-2x text-gray-300"></i>
@@ -259,7 +259,7 @@
 							              		<div class="row no-gutters align-items-center">
 							                		<div class="col mr-2">
 							                  			<div class="text-xs font-weight-bold text-danger text-uppercase mb-1">Current Electricity Price</div>
-							                  			<div class="h5 mb-0 font-weight-bold text-gray-800">1.5 SEK /kwh</div>
+							                  			<div id="currentPrice" class="h5 mb-0 font-weight-bold text-gray-800">1.5 SEK /kwh</div>
 							                		</div>
 									                <div class="col-auto">
 									                  	<i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
@@ -467,6 +467,30 @@
                     	console.log(response);
                         if (response) {
                         	$('#currentConsumption').html((Math.round(response.electricityConsumption * 1000000) / 1000000) + " kwh");
+                        }
+                    }
+                });
+
+                $.ajax({
+                    type: 'GET',
+                    url: 'http://localhost:8080/getWindSpeed',
+                    dataType: 'json',
+                    success: function(response){
+                    	console.log(response);
+                        if (response) {
+                        	$('#currentWind').html(response.windSpeed + " km/h");
+                        }
+                    }
+                });
+
+                $.ajax({
+                    type: 'GET',
+                    url: 'http://localhost:8080/getCurrentElectricityPrice',
+                    dataType: 'json',
+                    success: function(response){
+                    	console.log(response);
+                        if (response) {
+                        	$('#currentPrice').html(response.currentElectricityPrice + " SEK/kwh");
                         }
                     }
                 });
