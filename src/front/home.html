@@ -136,7 +136,7 @@
 								              	<div class="row no-gutters align-items-center">
 									                <div class="col mr-2">
 									                  	<div class="text-xs font-weight-bold text-success text-uppercase mb-1">Current Consumption</div>
-									                  	<div class="h5 mb-0 font-weight-bold text-gray-800">18 kw/h</div>
+									                  	<div id="currentConsumption" class="h5 mb-0 font-weight-bold text-gray-800">18 kw/h</div>
 									                </div>
 									                <div class="col-auto">
 									                  	<i class="fas fa-charging-station fa-2x text-gray-300"></i>
@@ -449,13 +449,24 @@
                     type: 'GET',
                     url: 'http://localhost:8081/getProsumerLogged?token=' + window.localStorage.getItem('token'),
                     dataType: 'json',
-                    contentType: 'application/json',
                     success: function(prosumer){
                     	console.log(prosumer);
                         if (prosumer == false) {
                             window.location = "index.html";
                         } else {
                         	$('#accountTitle').html("Dashboard - " + prosumer.email);
+                        }
+                    }
+                });
+
+                $.ajax({
+                    type: 'GET',
+                    url: 'http://localhost:8081/getProsumerElectricityConsumption?token=' + window.localStorage.getItem('token'),
+                    dataType: 'json',
+                    success: function(response){
+                    	console.log(response);
+                        if (response) {
+                        	$('#currentConsumption').html((Math.round(response.electricityConsumption * 1000000) / 1000000) + " kwh");
                         }
                     }
                 });

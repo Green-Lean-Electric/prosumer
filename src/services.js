@@ -104,19 +104,22 @@ exports.getProsumerElectricityConsumption = function (token) {
     return database
         .find(undefined, databaseName, collectionName, prosumertoken)
         .then((results) => {
-            const prosumerId = results[0].email;
-            const simulatorServer = require('../../utils/src/configuration.js')
-                .serversConfiguration
-                .simulator;
+            if(results.length != 0){
+                const prosumerId = results[0].email;
+                const simulatorServer = require('../../utils/src/configuration.js')
+                    .serversConfiguration
+                    .simulator;
 
-            const options = {
-                hostname: simulatorServer.hostname,
-                port: simulatorServer.port,
-                path: '/getElectricityConsumption?' + querystring.stringify({prosumerId}),
-                method: 'GET'
-            };
+                const options = {
+                    hostname: simulatorServer.hostname,
+                    port: simulatorServer.port,
+                    path: '/getElectricityConsumption?' + querystring.stringify({prosumerId}),
+                    method: 'GET'
+                };
 
-            return httpRequest(options);
+                return httpRequest(options);
+            }
+            return false;
         });
 };
 
