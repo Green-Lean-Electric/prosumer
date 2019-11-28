@@ -444,6 +444,10 @@
 		<script src="js/demo/chart-pie-demo.js"></script>
 
 		<script>
+			// Set new default font family and font color to mimic Bootstrap's default styling
+			Chart.defaults.global.defaultFontFamily = 'Nunito', '-apple-system,system-ui,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif';
+			Chart.defaults.global.defaultFontColor = '#858796';
+
 			$( document ).ready(function() {
 				$.when(
 					getProsumerLogged(), 
@@ -451,13 +455,16 @@
 					getWindSpeed(), 
 					getCurrentElectricityPrice(), 
 					getElectricityProduction()
-				).done(function(prosumer, electricityConsumption, windSpeed, electricityPrice, electricityProcduction){
-					var netProduction = electricityProcduction[0] - electricityConsumption[0].electricityConsumption;
-					$('#netProduction').html((Math.round(netProduction * 1000000) / 1000000) + " kwh");
+				).done(function(prosumer, electricityConsumption, windSpeed, electricityPrice, electricityProduction){
+					console.log(prosumer[0]);
+					var netProduction = electricityProduction[0] - electricityConsumption[0].electricityConsumption;
+					$('#netProduction').html(round(netProduction) + " kwh");
+
+					drawProductionPieChart(prosumer[0], electricityConsumption[0].electricityConsumption, electricityProduction[0], netProduction);
+
+					drawConsumptionPieChart(prosumer[0], electricityConsumption[0].electricityConsumption, electricityProduction[0], netProduction);
 				});
-
-                
-
+               
                 $('#logout').on('click', function(){
                 	$.ajax({
 	                    type: 'GET',
@@ -507,7 +514,6 @@
                     url: 'http://localhost:8081/getProsumerLogged?token=' + window.localStorage.getItem('token'),
                     dataType: 'json',
                     success: function(prosumer){
-                    	console.log(prosumer);
                         if (prosumer == false) {
                             window.location = "index.html";
                         } else {
@@ -523,9 +529,8 @@
                     url: 'http://localhost:8081/getProsumerElectricityConsumption?token=' + window.localStorage.getItem('token'),
                     dataType: 'json',
                     success: function(response){
-                    	console.log(response);
                         if (response) {
-                        	$('#currentConsumption').html((Math.round(response.electricityConsumption * 1000000) / 1000000) + " kwh");
+                        	$('#currentConsumption').html(round(response.electricityConsumption) + " kwh");
                         }
                     }
                 });
@@ -537,7 +542,6 @@
                     url: 'http://localhost:8080/getWindSpeed',
                     dataType: 'json',
                     success: function(response){
-                    	console.log(response);
                         if (response) {
                         	$('#currentWind').html(response.windSpeed + " km/h");
                         }
@@ -551,7 +555,6 @@
                     url: 'http://localhost:8080/getCurrentElectricityPrice',
                     dataType: 'json',
                     success: function(response){
-                    	console.log(response);
                         if (response) {
                         	$('#currentPrice').html(response.currentElectricityPrice + " SEK/kwh");
                         }
@@ -565,13 +568,124 @@
                     url: 'http://localhost:8080/getElectricityProduction',
                     dataType: 'json',
                     success: function(response){
-                    	console.log(response);
                         if (response) {
                         	$('#currrentProduction').html(response + " kw");
                         }
                     }
                 });
 			}    
+
+			function round(number){
+				return (Math.round(number * 1000000) / 1000000);
+			}
+
+			function drawProductionPieChart(prosumer, electricityConsumption, electricityProduction, netProduction){
+				// Pie Charts
+				var ctx = document.getElementById("ProductionPieChart");
+
+				var pchart_buffer_percent = 0.7;
+				if ('pchart_buffer_percent' in prosumer){
+					pchart_buffer_percent = prosumer.pchart_buffer_percent;
+				}
+				var pchart_market_percent = 0.3;
+				if ('pchart_market_percent' in prosumer){
+					pchart_market_percent = prosumer.pchart_market_percent;
+				}
+
+				var pchart_ownConsumption = (electricityConsumption * 100) / electricityProduction;
+
+				var pchart_buffer = (pchart_buffer_percent * netProduction * 100) / electricityProduction;
+
+				var pchart_market = (pchart_market_percent * netProduction * 100) / electricityProduction;
+
+				var myPieChart = new Chart(ctx, {
+				  type: 'doughnut',
+				  data: {
+				    labels: ["Own Consumption", "Buffer", "Market"],
+				    datasets: [{
+				      data: [round(pchart_ownConsumption), round(pchart_buffer), round(pchart_market)],
+				      backgroundColor: ['#1cc88a', '#f6c23e', '#e74a3b'],
+				      hoverBackgroundColor: ['#17a673', '#F4B619', '#E02D1B'],
+				      hoverBorderColor: "rgba(234, 236, 244, 1)",
+				    }],
+				  },
+				  options: {
+				    maintainAspectRatio: false,
+				    tooltips: {
+				      backgroundColor: "rgb(255,255,255)",
+				      bodyFontColor: "#858796",
+				      borderColor: '#dddfeb',
+				      borderWidth: 1,
+				      xPadding: 15,
+				      yPadding: 15,
+				      displayColors: false,
+				      caretPadding: 10,
+				    },
+				    legend: {
+				      display: false
+				    },
+				    cutoutPercentage: 80,
+				  },
+				});
+			}
+
+
+			function drawConsumptionPieChart(prosumer, electricityConsumption, electricityProduction, netProduction){
+				var ctx = document.getElementById("ConsumptionPieChart");
+
+				var cchart_ownProduction = (electricityProduction * 100) / electricityConsumption;
+				var cchart_buffer;
+				var cchart_market;
+
+				if(cchart_ownProduction >= 100){
+					cchart_ownProduction = 100;
+					cchart_buffer = 0;
+					cchart_market = 0;
+				} else {
+					var cchart_buffer_percent = 0.8;
+					if ('cchart_buffer_percent' in prosumer){
+						cchart_buffer_percent = prosumer.cchart_buffer_percent;
+					}
+					var cchart_market_percent = 0.2;
+					if ('cchart_market_percent' in prosumer){
+						cchart_market_percent = prosumer.cchart_market_percent;
+					}
+
+					cchart_buffer = (cchart_buffer_percent * netProduction * 100) / electricityProduction;
+
+					cchart_market = (cchart_market_percent * netProduction * 100) / electricityProduction;
+				}
+
+				var myPieChart = new Chart(ctx, {
+				  type: 'doughnut',
+				  data: {
+				    labels: ["Own Production", "Buffer", "Market"],
+				    datasets: [{
+				      data: [cchart_ownProduction, cchart_buffer, cchart_market],
+				      backgroundColor: ['#36b9cc', '#f6c23e', '#e74a3b'],
+				      hoverBackgroundColor: ['#2C9FAF', '#F4B619', '#E02D1B'],
+				      hoverBorderColor: "rgba(234, 236, 244, 1)",
+				    }],
+				  },
+				  options: {
+				    maintainAspectRatio: false,
+				    tooltips: {
+				      backgroundColor: "rgb(255,255,255)",
+				      bodyFontColor: "#858796",
+				      borderColor: '#dddfeb',
+				      borderWidth: 1,
+				      xPadding: 15,
+				      yPadding: 15,
+				      displayColors: false,
+				      caretPadding: 10,
+				    },
+				    legend: {
+				      display: false
+				    },
+				    cutoutPercentage: 80,
+				  },
+				});
+			};
 		</script>
 
 	</body>
