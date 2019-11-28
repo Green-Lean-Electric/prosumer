@@ -2,8 +2,6 @@
   "name": "prosumer",
   "version": "0.1.0",
   "dependencies": {
-    "base64-img": "^1.0.4",
-    "blob": "0.0.5",
     "mongodb": "^3.3.4"
   }
 }
