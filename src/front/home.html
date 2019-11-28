@@ -79,7 +79,7 @@
 												<div class="row no-gutters align-items-center">
 													<div class="col mr-2">
 														<div class="text-xs font-weight-bold text-info text-uppercase mb-1">Current Production</div>
-														<div class="h5 mb-0 font-weight-bold text-gray-800">50 kw/h</div>
+														<div id="currrentProduction" class="h5 mb-0 font-weight-bold text-gray-800"></div>
 													</div>
 													<div class="col-auto">
 														<i class="fas fa-bolt fa-2x text-gray-300"></i>
@@ -136,7 +136,7 @@
 								              	<div class="row no-gutters align-items-center">
 									                <div class="col mr-2">
 									                  	<div class="text-xs font-weight-bold text-success text-uppercase mb-1">Current Consumption</div>
-									                  	<div id="currentConsumption" class="h5 mb-0 font-weight-bold text-gray-800">18 kw/h</div>
+									                  	<div id="currentConsumption" class="h5 mb-0 font-weight-bold text-gray-800"></div>
 									                </div>
 									                <div class="col-auto">
 									                  	<i class="fas fa-charging-station fa-2x text-gray-300"></i>
@@ -196,7 +196,7 @@
 									                  	<div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Net Production</div>
 									                  	<div class="row no-gutters align-items-center">
 									                    	<div class="col-auto">
-									                      		<div class="h5 mb-0 mr-3 font-weight-bold text-gray-800">32 kw/h</div>
+									                      		<div id="netProduction" class="h5 mb-0 mr-3 font-weight-bold text-gray-800"></div>
 									                    	</div>
 									                  	</div>
 									                </div>
@@ -217,7 +217,7 @@
 									                  	<div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Buffer filling</div>
 									                  	<div class="row no-gutters align-items-center">
 									                    	<div class="col-auto">
-									                      		<div class="h5 mb-0 mr-3 font-weight-bold text-gray-800">50 %</div>
+									                      		<div class="h5 mb-0 mr-3 font-weight-bold text-gray-800"></div>
 									                    	</div>
 									                    	<div class="col">
 									                      		<div class="progress progress-sm mr-2">
@@ -241,7 +241,7 @@
 							              		<div class="row no-gutters align-items-center">
 							                		<div class="col mr-2">
 							                  			<div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Current Wind</div>
-							                  			<div id="currentWind" class="h5 mb-0 font-weight-bold text-gray-800">18 km/h</div>
+							                  			<div id="currentWind" class="h5 mb-0 font-weight-bold text-gray-800"></div>
 							                		</div>
 							                		<div class="col-auto">
 							                  			<i class="fas fa-wind fa-2x text-gray-300"></i>
@@ -259,7 +259,7 @@
 							              		<div class="row no-gutters align-items-center">
 							                		<div class="col mr-2">
 							                  			<div class="text-xs font-weight-bold text-danger text-uppercase mb-1">Current Electricity Price</div>
-							                  			<div id="currentPrice" class="h5 mb-0 font-weight-bold text-gray-800">1.5 SEK /kwh</div>
+							                  			<div id="currentPrice" class="h5 mb-0 font-weight-bold text-gray-800"></div>
 							                		</div>
 									                <div class="col-auto">
 									                  	<i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
@@ -445,55 +445,18 @@
 
 		<script>
 			$( document ).ready(function() {
-				$.ajax({
-                    type: 'GET',
-                    url: 'http://localhost:8081/getProsumerLogged?token=' + window.localStorage.getItem('token'),
-                    dataType: 'json',
-                    success: function(prosumer){
-                    	console.log(prosumer);
-                        if (prosumer == false) {
-                            window.location = "index.html";
-                        } else {
-                        	$('#accountTitle').html("Dashboard - " + prosumer.email);
-                        }
-                    }
-                });
+				$.when(
+					getProsumerLogged(), 
+					getProsumerElectricityConsumption(), 
+					getWindSpeed(), 
+					getCurrentElectricityPrice(), 
+					getElectricityProduction()
+				).done(function(prosumer, electricityConsumption, windSpeed, electricityPrice, electricityProcduction){
+					var netProduction = electricityProcduction[0] - electricityConsumption[0].electricityConsumption;
+					$('#netProduction').html((Math.round(netProduction * 1000000) / 1000000) + " kwh");
+				});
 
-                $.ajax({
-                    type: 'GET',
-                    url: 'http://localhost:8081/getProsumerElectricityConsumption?token=' + window.localStorage.getItem('token'),
-                    dataType: 'json',
-                    success: function(response){
-                    	console.log(response);
-                        if (response) {
-                        	$('#currentConsumption').html((Math.round(response.electricityConsumption * 1000000) / 1000000) + " kwh");
-                        }
-                    }
-                });
-
-                $.ajax({
-                    type: 'GET',
-                    url: 'http://localhost:8080/getWindSpeed',
-                    dataType: 'json',
-                    success: function(response){
-                    	console.log(response);
-                        if (response) {
-                        	$('#currentWind').html(response.windSpeed + " km/h");
-                        }
-                    }
-                });
-
-                $.ajax({
-                    type: 'GET',
-                    url: 'http://localhost:8080/getCurrentElectricityPrice',
-                    dataType: 'json',
-                    success: function(response){
-                    	console.log(response);
-                        if (response) {
-                        	$('#currentPrice').html(response.currentElectricityPrice + " SEK/kwh");
-                        }
-                    }
-                });
+                
 
                 $('#logout').on('click', function(){
                 	$.ajax({
@@ -536,7 +499,79 @@
 			            },
 			        });
 			    });
-			});    
+			});
+
+			function getProsumerLogged() {
+			    return $.ajax({
+                    type: 'GET',
+                    url: 'http://localhost:8081/getProsumerLogged?token=' + window.localStorage.getItem('token'),
+                    dataType: 'json',
+                    success: function(prosumer){
+                    	console.log(prosumer);
+                        if (prosumer == false) {
+                            window.location = "index.html";
+                        } else {
+                        	$('#accountTitle').html("Dashboard - " + prosumer.email);
+                        }
+                    }
+                });
+			}    
+
+			function getProsumerElectricityConsumption() {
+			    return $.ajax({
+                    type: 'GET',
+                    url: 'http://localhost:8081/getProsumerElectricityConsumption?token=' + window.localStorage.getItem('token'),
+                    dataType: 'json',
+                    success: function(response){
+                    	console.log(response);
+                        if (response) {
+                        	$('#currentConsumption').html((Math.round(response.electricityConsumption * 1000000) / 1000000) + " kwh");
+                        }
+                    }
+                });
+			}    
+
+			function getWindSpeed() {
+			    return $.ajax({
+                    type: 'GET',
+                    url: 'http://localhost:8080/getWindSpeed',
+                    dataType: 'json',
+                    success: function(response){
+                    	console.log(response);
+                        if (response) {
+                        	$('#currentWind').html(response.windSpeed + " km/h");
+                        }
+                    }
+                });
+			}    
+
+			function getCurrentElectricityPrice() {
+			    return $.ajax({
+                    type: 'GET',
+                    url: 'http://localhost:8080/getCurrentElectricityPrice',
+                    dataType: 'json',
+                    success: function(response){
+                    	console.log(response);
+                        if (response) {
+                        	$('#currentPrice').html(response.currentElectricityPrice + " SEK/kwh");
+                        }
+                    }
+                });
+			}    
+
+			function getElectricityProduction() {
+			    return $.ajax({
+                    type: 'GET',
+                    url: 'http://localhost:8080/getElectricityProduction',
+                    dataType: 'json',
+                    success: function(response){
+                    	console.log(response);
+                        if (response) {
+                        	$('#currrentProduction').html(response + " kw");
+                        }
+                    }
+                });
+			}    
 		</script>
 
 	</body>
