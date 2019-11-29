@@ -445,44 +445,18 @@
 			Chart.defaults.global.defaultFontColor = '#858796';
 
 			$( document ).ready(function() {
-				setTimeout(function(){
+				sendRequests();
+
+				setInterval(function(){
 					var isPopUp = false;
 					$('.modal.fade').each(function(){
-						if ( this.style.display == "block" ){console.log(this);
+						if ( this.style.display == "block" ){
 							isPopUp = true;
 						}
 					});console.log(isPopUp);
 					if(!isPopUp)
-				   		window.location.reload(1); //TODO changer et reload que les donnés
+				   		sendRequests();
 				}, 10000);
-
-				$.when(
-					getProsumerLogged(), 
-					getProsumerElectricityConsumption(), 
-					getWindSpeed(), 
-					getCurrentElectricityPrice(), 
-					getElectricityProduction()
-				).done(function(prosumer, electricityConsumption, windSpeed, electricityPrice, electricityProduction){
-					console.log(prosumer);
-					var netProduction = electricityProduction[0] - electricityConsumption[0].electricityConsumption;
-					$('#netProduction').html(round(netProduction) + " kwh");
-
-					var productionRatioBuffer = ('productionRatioBuffer' in prosumer ? prosumer.productionRatioBuffer : 0.7 );
-					var productionRatioMarket = ('productionRatioMarket' in prosumer ? prosumer.productionRatioMarket : 0.3 );
-					var consumptionRatioBuffer = ('consumptionRatioBuffer' in prosumer ? prosumer.consumptionRatioBuffer : 0.8 );
-					var consumptionRatioMarket = ('consumptionRatioMarket' in prosumer ? prosumer.consumptionRatioMarket : 0.2 );
-
-					$('#productionRatioBuffer').val(productionRatioBuffer * 100);
-					$('#productionRatioMarket').val(productionRatioMarket * 100);
-					$('#consumptionRatioBuffer').val(consumptionRatioBuffer * 100);
-					$('#consumptionRatioMarket').val(consumptionRatioMarket * 100);
-
-					$('#netProduction').html(round(netProduction) + " kwh");
-
-					drawProductionPieChart(productionRatioBuffer, productionRatioMarket, electricityConsumption[0].electricityConsumption, electricityProduction[0], netProduction);
-
-					drawConsumptionPieChart(consumptionRatioBuffer, consumptionRatioMarket, electricityConsumption[0].electricityConsumption, electricityProduction[0], netProduction);
-				});
                
                 $('#logout').on('click', function(){
                 	$.ajax({
@@ -589,6 +563,36 @@
 	            });
 
 			});
+
+			function sendRequests(){
+				$.when(
+					getProsumerLogged(), 
+					getProsumerElectricityConsumption(), 
+					getWindSpeed(), 
+					getCurrentElectricityPrice(), 
+					getElectricityProduction()
+				).done(function(prosumer, electricityConsumption, windSpeed, electricityPrice, electricityProduction){
+					console.log(prosumer);
+					var netProduction = electricityProduction[0] - electricityConsumption[0].electricityConsumption;
+					$('#netProduction').html(round(netProduction) + " kwh");
+
+					var productionRatioBuffer = ('productionRatioBuffer' in prosumer ? prosumer.productionRatioBuffer : 0.7 );
+					var productionRatioMarket = ('productionRatioMarket' in prosumer ? prosumer.productionRatioMarket : 0.3 );
+					var consumptionRatioBuffer = ('consumptionRatioBuffer' in prosumer ? prosumer.consumptionRatioBuffer : 0.8 );
+					var consumptionRatioMarket = ('consumptionRatioMarket' in prosumer ? prosumer.consumptionRatioMarket : 0.2 );
+
+					$('#productionRatioBuffer').val(productionRatioBuffer * 100);
+					$('#productionRatioMarket').val(productionRatioMarket * 100);
+					$('#consumptionRatioBuffer').val(consumptionRatioBuffer * 100);
+					$('#consumptionRatioMarket').val(consumptionRatioMarket * 100);
+
+					$('#netProduction').html(round(netProduction) + " kwh");
+
+					drawProductionPieChart(productionRatioBuffer, productionRatioMarket, electricityConsumption[0].electricityConsumption, electricityProduction[0], netProduction);
+
+					drawConsumptionPieChart(consumptionRatioBuffer, consumptionRatioMarket, electricityConsumption[0].electricityConsumption, electricityProduction[0], netProduction);
+				});
+			}
 
 			function getProsumerLogged() {
 			    return $.ajax({
