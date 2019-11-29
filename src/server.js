@@ -19,7 +19,7 @@ const routes = {
         server.getParam(request, 'token')
     ),
     '/uploadPicture': request => parseParams(request).then( data => service.uploadProsumerPicture(data)),
-    '/changeRatio': request => parseParams(request).then( data => service.changeRatio(data)),
+    '/updateData': request => parseParams(request).then( data => service.updateData(data)),
 };
 
 const staticFiles = {

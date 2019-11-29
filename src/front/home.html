@@ -217,11 +217,11 @@
 									                  	<div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Buffer filling</div>
 									                  	<div class="row no-gutters align-items-center">
 									                    	<div class="col-auto">
-									                      		<div class="h5 mb-0 mr-3 font-weight-bold text-gray-800"></div>
+									                      		<div id="bufferFilling" class="h5 mb-0 mr-3 font-weight-bold text-gray-800"></div>
 									                    	</div>
 									                    	<div class="col">
 									                      		<div class="progress progress-sm mr-2">
-									                        		<div class="progress-bar bg-warning" role="progressbar" style="width: 50%" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100"></div>
+									                        		<div id="bufferFillingBar" class="progress-bar bg-warning" role="progressbar" style="" aria-valuemin="0" aria-valuemax="100"></div>
 									                      		</div>
 									                    	</div>
 									                  	</div>
@@ -506,13 +506,12 @@
 	                var data = { 
 	                    productionRatioBuffer: productionRatioBuffer/100, 
 	                    productionRatioMarket: productionRatioMarket/100,
-	                    token: window.localStorage.getItem('token'),
-	                    //isProduction: true
+	                    token: window.localStorage.getItem('token')
 	                };
 	                // call API
 	                $.ajax({
 	                    type: 'POST',
-	                    url: 'http://localhost:8081/changeRatio',
+	                    url: 'http://localhost:8081/updateData',
 	                    dataType: 'json',
 	                    contentType: 'application/json',
 	                    data: JSON.stringify(data),
@@ -537,13 +536,12 @@
 	                var data = { 
 	                    consumptionRatioBuffer: consumptionRatioBuffer/100, 
 	                    consumptionRatioMarket: consumptionRatioMarket/100,
-	                    token: window.localStorage.getItem('token'),
-	                    isProduction: false
+	                    token: window.localStorage.getItem('token')
 	                };
 	                // call API
 	                $.ajax({
 	                    type: 'POST',
-	                    url: 'http://localhost:8081/changeRatio',
+	                    url: 'http://localhost:8081/updateData',
 	                    dataType: 'json',
 	                    contentType: 'application/json',
 	                    data: JSON.stringify(data),
@@ -572,7 +570,13 @@
 					getCurrentElectricityPrice(), 
 					getElectricityProduction()
 				).done(function(prosumer, electricityConsumption, windSpeed, electricityPrice, electricityProduction){
-					console.log(prosumer);
+					console.log(prosumer[0]);
+/*electricityConsumption[0].electricityConsumption = 5;
+electricityProduction[0] = 1;*/
+					var currentBufferFilling = round(('bufferFilling' in prosumer[0] ? prosumer[0].bufferFilling : 0 ));
+					$('#bufferFilling').html(currentBufferFilling);
+					$("#bufferFillingBar").width(currentBufferFilling + "%");
+
 					var netProduction = electricityProduction[0] - electricityConsumption[0].electricityConsumption;
 					$('#netProduction').html(round(netProduction) + " kwh");
 
@@ -588,9 +592,35 @@
 
 					$('#netProduction').html(round(netProduction) + " kwh");
 
-					drawProductionPieChart(productionRatioBuffer, productionRatioMarket, electricityConsumption[0].electricityConsumption, electricityProduction[0], netProduction);
+					var addToBuffer = drawProductionPieChart(productionRatioBuffer, productionRatioMarket, electricityConsumption[0].electricityConsumption, electricityProduction[0], netProduction);
 
-					drawConsumptionPieChart(consumptionRatioBuffer, consumptionRatioMarket, electricityConsumption[0].electricityConsumption, electricityProduction[0], netProduction);
+					var removeFromBuffer = drawConsumptionPieChart(consumptionRatioBuffer, consumptionRatioMarket, electricityConsumption[0].electricityConsumption, electricityProduction[0], netProduction);
+console.log(addToBuffer);console.log(removeFromBuffer);
+					var newBufferFilling = currentBufferFilling + addToBuffer - removeFromBuffer;
+					if(newBufferFilling > 100)
+						newBufferFilling == 100
+
+	                var data = { 
+	                    bufferFilling:  newBufferFilling, 
+	                    token: window.localStorage.getItem('token')
+	                };
+
+					$.ajax({
+	                    type: 'POST',
+	                    url: 'http://localhost:8081/updateData',
+	                    dataType: 'json',
+	                    contentType: 'application/json',
+	                    data: JSON.stringify(data),
+	                    success: function(response){
+	                        if (JSON.parse(response)) {
+	                            return true;
+	                        }
+	                        else {
+	                            return false;
+	                        }
+	                    }
+	                });
+
 				});
 			}
 
@@ -672,14 +702,17 @@
 				var pchart_ownConsumption = (electricityConsumption * 100) / electricityProduction;
 				var pchart_buffer;
 				var pchart_market;
+				var bufferFilling;
 
 				if(electricityProduction <= electricityConsumption){ // Tout ce que je produit par a ma conso
 					pchart_ownConsumption = 100;
 					pchart_buffer = 0;
 					pchart_market = 0;
+					bufferFilling = 0;
 				}else { // je produit plus que ma conso ou va le reste ?
 
 					pchart_buffer = (pchart_buffer_percent * production_rest * 100) / electricityProduction;
+					bufferFilling = pchart_buffer_percent * production_rest;
 					pchart_market = (pchart_market_percent * production_rest * 100) / electricityProduction;
 				}
 
@@ -712,6 +745,8 @@
 				    cutoutPercentage: 80,
 				  },
 				});
+
+				return bufferFilling;
 			}
 
 
@@ -721,19 +756,21 @@
 				var cchart_ownProduction = (electricityProduction * 100) / electricityConsumption;
 				var cchart_buffer;
 				var cchart_market;
+				var bufferEmptying;
 
 				if(cchart_ownProduction >= 100){ // Je produit plus que ce que je consomme
 					cchart_ownProduction = 100;
 					cchart_buffer = 0;
 					cchart_market = 0;
+					bufferEmptying = 0;
 				}else { //Je produit pas assez pour ma conso
 
 					if(cchart_ownProduction <= 0){
 						consumption_rest = electricityConsumption;
-					}
-					cchart_buffer = (cchart_buffer_percent * consumption_rest * 100) / electricityConsumption;
-
-					cchart_market = (cchart_market_percent * consumption_rest * 100) / electricityConsumption;
+					}console.log(consumption_rest);
+					cchart_buffer = (cchart_buffer_percent * Math.abs(consumption_rest) * 100) / electricityConsumption;
+					bufferEmptying = cchart_buffer_percent * Math.abs(consumption_rest);
+					cchart_market = (cchart_market_percent * Math.abs(consumption_rest) * 100) / electricityConsumption;
 				}
 
 				var myPieChart = new Chart(ctx, {
@@ -765,6 +802,8 @@
 				    cutoutPercentage: 80,
 				  },
 				});
+
+				return bufferEmptying;
 			};
 		</script>
 

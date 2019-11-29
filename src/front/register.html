@@ -84,7 +84,8 @@
                 if(pwd == repeatpwd){
                     var data = { 
                         email: email, 
-                        password: pwd
+                        password: pwd,
+                        bufferSize: 10
                     };
                     // call API
                     $.ajax({

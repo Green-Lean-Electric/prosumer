@@ -48,7 +48,7 @@ exports.disconnectProsumer = function (token) {
         });
 };
 
-exports.changeRatio = function (data){
+exports.updateData = function (data){
     const databaseName = DATABASE_NAME;
     const collectionName = 'prosumers';
 
@@ -56,25 +56,17 @@ exports.changeRatio = function (data){
     var token = data.token;
     delete data.token;
 
-    var updateOperation = {
-        $set: {
-                data
-            }
-        };
-   /* if(dataObj.isProduction)
+    var updateOperation;
+    if(data.length > 1)
         updateOperation = {
             $set: {
-                "productionRatioBuffer":dataObj.productionRatioBuffer, 
-                "productionRatioMarket":dataObj.productionRatioMarket
-            }
-        };
+                    data
+                }
+            };
     else
         updateOperation = {
-            $set: {
-                "consumptionRatioBuffer":dataObj.consumptionRatioBuffer, 
-                "consumptionRatioMarket":dataObj.consumptionRatioMarket
-            }
-        };*/
+            $set: data
+        };
 
     return database
         .updateOne(undefined, databaseName, collectionName, {token}, updateOperation)
