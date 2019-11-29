@@ -507,7 +507,7 @@
 	                    productionRatioBuffer: productionRatioBuffer/100, 
 	                    productionRatioMarket: productionRatioMarket/100,
 	                    token: window.localStorage.getItem('token'),
-	                    isProduction: true
+	                    //isProduction: true
 	                };
 	                // call API
 	                $.ajax({
@@ -576,10 +576,10 @@
 					var netProduction = electricityProduction[0] - electricityConsumption[0].electricityConsumption;
 					$('#netProduction').html(round(netProduction) + " kwh");
 
-					var productionRatioBuffer = ('productionRatioBuffer' in prosumer ? prosumer.productionRatioBuffer : 0.7 );
-					var productionRatioMarket = ('productionRatioMarket' in prosumer ? prosumer.productionRatioMarket : 0.3 );
-					var consumptionRatioBuffer = ('consumptionRatioBuffer' in prosumer ? prosumer.consumptionRatioBuffer : 0.8 );
-					var consumptionRatioMarket = ('consumptionRatioMarket' in prosumer ? prosumer.consumptionRatioMarket : 0.2 );
+					var productionRatioBuffer = ('productionRatioBuffer' in prosumer[0] ? prosumer[0].productionRatioBuffer : 0.7 );
+					var productionRatioMarket = ('productionRatioMarket' in prosumer[0] ? prosumer[0].productionRatioMarket : 0.3 );
+					var consumptionRatioBuffer = ('consumptionRatioBuffer' in prosumer[0] ? prosumer[0].consumptionRatioBuffer : 0.8 );
+					var consumptionRatioMarket = ('consumptionRatioMarket' in prosumer[0] ? prosumer[0].consumptionRatioMarket : 0.2 );
 
 					$('#productionRatioBuffer').val(productionRatioBuffer * 100);
 					$('#productionRatioMarket').val(productionRatioMarket * 100);

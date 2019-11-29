@@ -52,9 +52,16 @@ exports.changeRatio = function (data){
     const databaseName = DATABASE_NAME;
     const collectionName = 'prosumers';
 
-    var dataObj = JSON.parse(data);console.log(dataObj);
-    var updateOperation = {};
-    if(dataObj.isProduction)
+    data = JSON.parse(data);console.log(data);
+    var token = data.token;
+    delete data.token;
+
+    var updateOperation = {
+        $set: {
+                data
+            }
+        };
+   /* if(dataObj.isProduction)
         updateOperation = {
             $set: {
                 "productionRatioBuffer":dataObj.productionRatioBuffer, 
@@ -67,10 +74,10 @@ exports.changeRatio = function (data){
                 "consumptionRatioBuffer":dataObj.consumptionRatioBuffer, 
                 "consumptionRatioMarket":dataObj.consumptionRatioMarket
             }
-        };
+        };*/
 
     return database
-        .updateOne(undefined, databaseName, collectionName, {"token":dataObj.token}, updateOperation)
+        .updateOne(undefined, databaseName, collectionName, {token}, updateOperation)
         .then((nModified) => {
             if(nModified != 0){
                 console.log(`Ratio modifiés'`);
