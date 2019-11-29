@@ -48,6 +48,40 @@ exports.disconnectProsumer = function (token) {
         });
 };
 
+exports.changeRatio = function (data){
+    const databaseName = DATABASE_NAME;
+    const collectionName = 'prosumers';
+
+    var dataObj = JSON.parse(data);console.log(dataObj);
+    var updateOperation = {};
+    if(dataObj.isProduction)
+        updateOperation = {
+            $set: {
+                "productionRatioBuffer":dataObj.productionRatioBuffer, 
+                "productionRatioMarket":dataObj.productionRatioMarket
+            }
+        };
+    else
+        updateOperation = {
+            $set: {
+                "consumptionRatioBuffer":dataObj.consumptionRatioBuffer, 
+                "consumptionRatioMarket":dataObj.consumptionRatioMarket
+            }
+        };
+
+    return database
+        .updateOne(undefined, databaseName, collectionName, {"token":dataObj.token}, updateOperation)
+        .then((nModified) => {
+            if(nModified != 0){
+                console.log(`Ratio modifiés'`);
+                return true;
+            }else{
+                console.log(`User not found or data already with the same values`);
+                return false;
+            }
+        });
+}
+
 exports.getProsumerLogged = function (token) {
     const databaseName = DATABASE_NAME;
     const collectionName = 'prosumers';
@@ -59,11 +93,9 @@ exports.getProsumerLogged = function (token) {
         .find(undefined, databaseName, collectionName, prosumer)
         .then((results) => {
             if(results.length == 1){
-                var response = {
-                    "email" : results[0].email,
-                    "picture" : results[0].picture
-                };
-                return response;
+                delete results[0].password;
+                delete results[0]._id;
+                return results[0];
             }
             return false;
         });

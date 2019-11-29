@@ -369,7 +369,7 @@
 						</button>
 					</div>
 					<div class="modal-body">
-						<form>
+						<form id="consumptionChartform" class="user" name="consumptionChartform" method="post">
 						  	<div class="form-group row">
 							    <label for="consumptonRatioBuffer" class="col-sm-4 col-form-label"><i class="fas fa-circle text-warning"></i>  Buffer (%)</label>
 							    <div class="col-sm-8">
@@ -386,7 +386,7 @@
 					</div>
 					<div class="modal-footer">
 						<button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
-						<a class="btn btn-primary" style="color: #fff;cursor:pointer;" >Validate</a>
+                        <input class="btn btn-primary btn-user btn-block" style="width: fit-content;" type="submit" value="Validate" onclick="$('#consumptionChartform').submit();">
 					</div>
 				</div>
 			</div>
@@ -403,15 +403,15 @@
 						</button>
 					</div>
 					<div class="modal-body">
-						<form>
+						<form id="productionChartform" class="user" name="productionChartform" method="post">
 						  	<div class="form-group row">
-							    <label for="consumptonRatioBuffer" class="col-sm-4 col-form-label"><i class="fas fa-circle text-warning"></i>  Buffer (%)</label>
+							    <label for="productionRatioBuffer" class="col-sm-4 col-form-label"><i class="fas fa-circle text-warning"></i>  Buffer (%)</label>
 							    <div class="col-sm-8">
 							      	<input type="number" class="form-control" id="productionRatioBuffer" min="0" max="100" >
 							    </div>
 						  	</div>
 						  	<div class="form-group row">
-							    <label for="consumptonRatioMarket" class="col-sm-4 col-form-label"><i class="fas fa-circle text-danger"></i>  Market (%)</label>
+							    <label for="productionRatioMarket" class="col-sm-4 col-form-label"><i class="fas fa-circle text-danger"></i>  Market (%)</label>
 							    <div class="col-sm-8">
 							      	<input type="number" class="form-control" id="productionRatioMarket" min="0" max="100" >
 							    </div>
@@ -420,7 +420,7 @@
 					</div>
 					<div class="modal-footer">
 						<button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
-						<a class="btn btn-primary" style="color: #fff;cursor:pointer;">Validate</a>
+                        <input class="btn btn-primary btn-user btn-block" style="width: fit-content;" type="submit" value="Validate" onclick="$('#productionChartform').submit();">
 					</div>
 				</div>
 			</div>
@@ -439,10 +439,6 @@
 		<!-- Page level plugins -->
 		<script src="vendor/chart.js/Chart.min.js"></script>
 
-		<!-- Page level custom scripts -->
-		<script src="js/demo/chart-area-demo.js"></script>
-		<script src="js/demo/chart-pie-demo.js"></script>
-
 		<script>
 			// Set new default font family and font color to mimic Bootstrap's default styling
 			Chart.defaults.global.defaultFontFamily = 'Nunito', '-apple-system,system-ui,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif';
@@ -456,13 +452,25 @@
 					getCurrentElectricityPrice(), 
 					getElectricityProduction()
 				).done(function(prosumer, electricityConsumption, windSpeed, electricityPrice, electricityProduction){
-					console.log(prosumer[0]);
+					console.log(prosumer);
 					var netProduction = electricityProduction[0] - electricityConsumption[0].electricityConsumption;
 					$('#netProduction').html(round(netProduction) + " kwh");
 
-					drawProductionPieChart(prosumer[0], electricityConsumption[0].electricityConsumption, electricityProduction[0], netProduction);
+					var productionRatioBuffer = ('productionRatioBuffer' in prosumer ? prosumer.productionRatioBuffer : 0.7 );
+					var productionRatioMarket = ('productionRatioMarket' in prosumer ? prosumer.productionRatioMarket : 0.3 );
+					var consumptionRatioBuffer = ('consumptionRatioBuffer' in prosumer ? prosumer.consumptionRatioBuffer : 0.8 );
+					var consumptionRatioMarket = ('consumptionRatioMarket' in prosumer ? prosumer.consumptionRatioMarket : 0.2 );
 
-					drawConsumptionPieChart(prosumer[0], electricityConsumption[0].electricityConsumption, electricityProduction[0], netProduction);
+					$('#productionRatioBuffer').val(productionRatioBuffer * 100);
+					$('#productionRatioMarket').val(productionRatioMarket * 100);
+					$('#consumptionRatioBuffer').val(consumptionRatioBuffer * 100);
+					$('#consumptionRatioMarket').val(consumptionRatioMarket * 100);
+
+					$('#netProduction').html(round(netProduction) + " kwh");
+
+					drawProductionPieChart(productionRatioBuffer, productionRatioMarket, electricityConsumption[0].electricityConsumption, electricityProduction[0], netProduction);
+
+					drawConsumptionPieChart(consumptionRatioBuffer, consumptionRatioMarket, electricityConsumption[0].electricityConsumption, electricityProduction[0], netProduction);
 				});
                
                 $('#logout').on('click', function(){
@@ -506,6 +514,69 @@
 			            },
 			        });
 			    });
+
+	            $('#productionChartform').submit(function () {
+	                var productionRatioBuffer = $('#productionRatioBuffer').val();
+	                var productionRatioMarket = $('#productionRatioMarket').val();
+	                var data = { 
+	                    productionRatioBuffer: productionRatioBuffer/100, 
+	                    productionRatioMarket: productionRatioMarket/100,
+	                    token: window.localStorage.getItem('token'),
+	                    isProduction: true
+	                };
+	                // call API
+	                $.ajax({
+	                    type: 'POST',
+	                    url: 'http://localhost:8081/changeRatio',
+	                    dataType: 'json',
+	                    contentType: 'application/json',
+	                    data: JSON.stringify(data),
+	                    success: function(response){
+	                        if (JSON.parse(response)) {
+	                            alert ("Ratio updated");
+	                            location.reload();
+	                            return true;
+	                        }
+	                        else {
+	                            alert ("Ratio not updated");
+	                            return false;
+	                        }
+	                    }
+	                });
+	                return false;
+	            });
+
+	            $('#consumptionChartform').submit(function () {
+	                var consumptionRatioBuffer = $('#consumptionRatioBuffer').val();
+	                var consumptionRatioMarket = $('#consumptionRatioMarket').val();
+	                var data = { 
+	                    consumptionRatioBuffer: consumptionRatioBuffer/100, 
+	                    consumptionRatioMarket: consumptionRatioMarket/100,
+	                    token: window.localStorage.getItem('token'),
+	                    isProduction: false
+	                };
+	                // call API
+	                $.ajax({
+	                    type: 'POST',
+	                    url: 'http://localhost:8081/changeRatio',
+	                    dataType: 'json',
+	                    contentType: 'application/json',
+	                    data: JSON.stringify(data),
+	                    success: function(response){
+	                        if (JSON.parse(response)) {
+	                            alert ("Ratio updated");
+	                            location.reload();
+	                            return true;
+	                        }
+	                        else {
+	                            alert ("Ratio not updated");
+	                            return false;
+	                        }
+	                    }
+	                });
+	                return false;
+	            });
+
 			});
 
 			function getProsumerLogged() {
@@ -579,18 +650,9 @@
 				return (Math.round(number * 1000000) / 1000000);
 			}
 
-			function drawProductionPieChart(prosumer, electricityConsumption, electricityProduction, netProduction){
+			function drawProductionPieChart(pchart_buffer_percent, pchart_market_percent, electricityConsumption, electricityProduction, netProduction){
 				// Pie Charts
 				var ctx = document.getElementById("ProductionPieChart");
-
-				var pchart_buffer_percent = 0.7;
-				if ('pchart_buffer_percent' in prosumer){
-					pchart_buffer_percent = prosumer.pchart_buffer_percent;
-				}
-				var pchart_market_percent = 0.3;
-				if ('pchart_market_percent' in prosumer){
-					pchart_market_percent = prosumer.pchart_market_percent;
-				}
 
 				var pchart_ownConsumption = (electricityConsumption * 100) / electricityProduction;
 
@@ -630,7 +692,7 @@
 			}
 
 
-			function drawConsumptionPieChart(prosumer, electricityConsumption, electricityProduction, netProduction){
+			function drawConsumptionPieChart(cchart_buffer_percent, cchart_market_percent, electricityConsumption, electricityProduction, netProduction){
 				var ctx = document.getElementById("ConsumptionPieChart");
 
 				var cchart_ownProduction = (electricityProduction * 100) / electricityConsumption;
@@ -642,14 +704,6 @@
 					cchart_buffer = 0;
 					cchart_market = 0;
 				} else {
-					var cchart_buffer_percent = 0.8;
-					if ('cchart_buffer_percent' in prosumer){
-						cchart_buffer_percent = prosumer.cchart_buffer_percent;
-					}
-					var cchart_market_percent = 0.2;
-					if ('cchart_market_percent' in prosumer){
-						cchart_market_percent = prosumer.cchart_market_percent;
-					}
 
 					cchart_buffer = (cchart_buffer_percent * netProduction * 100) / electricityProduction;
 
