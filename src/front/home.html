@@ -445,6 +445,17 @@
 			Chart.defaults.global.defaultFontColor = '#858796';
 
 			$( document ).ready(function() {
+				setTimeout(function(){
+					var isPopUp = false;
+					$('.modal.fade').each(function(){
+						if ( this.style.display == "block" ){console.log(this);
+							isPopUp = true;
+						}
+					});console.log(isPopUp);
+					if(!isPopUp)
+				   		window.location.reload(1); //TODO changer et reload que les donnés
+				}, 10000);
+
 				$.when(
 					getProsumerLogged(), 
 					getProsumerElectricityConsumption(), 
@@ -639,7 +650,7 @@
                     url: 'http://localhost:8080/getElectricityProduction',
                     dataType: 'json',
                     success: function(response){
-                        if (response) {
+                        if (response !== false) {
                         	$('#currrentProduction').html(response + " kw");
                         }
                     }
@@ -650,15 +661,23 @@
 				return (Math.round(number * 1000000) / 1000000);
 			}
 
-			function drawProductionPieChart(pchart_buffer_percent, pchart_market_percent, electricityConsumption, electricityProduction, netProduction){
+			function drawProductionPieChart(pchart_buffer_percent, pchart_market_percent, electricityConsumption, electricityProduction, production_rest){
 				// Pie Charts
 				var ctx = document.getElementById("ProductionPieChart");
 
 				var pchart_ownConsumption = (electricityConsumption * 100) / electricityProduction;
+				var pchart_buffer;
+				var pchart_market;
 
-				var pchart_buffer = (pchart_buffer_percent * netProduction * 100) / electricityProduction;
+				if(electricityProduction <= electricityConsumption){ // Tout ce que je produit par a ma conso
+					pchart_ownConsumption = 100;
+					pchart_buffer = 0;
+					pchart_market = 0;
+				}else { // je produit plus que ma conso ou va le reste ?
 
-				var pchart_market = (pchart_market_percent * netProduction * 100) / electricityProduction;
+					pchart_buffer = (pchart_buffer_percent * production_rest * 100) / electricityProduction;
+					pchart_market = (pchart_market_percent * production_rest * 100) / electricityProduction;
+				}
 
 				var myPieChart = new Chart(ctx, {
 				  type: 'doughnut',
@@ -692,22 +711,25 @@
 			}
 
 
-			function drawConsumptionPieChart(cchart_buffer_percent, cchart_market_percent, electricityConsumption, electricityProduction, netProduction){
+			function drawConsumptionPieChart(cchart_buffer_percent, cchart_market_percent, electricityConsumption, electricityProduction, consumption_rest){
 				var ctx = document.getElementById("ConsumptionPieChart");
 
 				var cchart_ownProduction = (electricityProduction * 100) / electricityConsumption;
 				var cchart_buffer;
 				var cchart_market;
 
-				if(cchart_ownProduction >= 100){
+				if(cchart_ownProduction >= 100){ // Je produit plus que ce que je consomme
 					cchart_ownProduction = 100;
 					cchart_buffer = 0;
 					cchart_market = 0;
-				} else {
+				}else { //Je produit pas assez pour ma conso
 
-					cchart_buffer = (cchart_buffer_percent * netProduction * 100) / electricityProduction;
+					if(cchart_ownProduction <= 0){
+						consumption_rest = electricityConsumption;
+					}
+					cchart_buffer = (cchart_buffer_percent * consumption_rest * 100) / electricityConsumption;
 
-					cchart_market = (cchart_market_percent * netProduction * 100) / electricityProduction;
+					cchart_market = (cchart_market_percent * consumption_rest * 100) / electricityConsumption;
 				}
 
 				var myPieChart = new Chart(ctx, {
