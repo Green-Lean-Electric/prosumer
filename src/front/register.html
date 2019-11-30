@@ -81,7 +81,8 @@
                 var pwd = document.registerform.password.value;
                 var repeatpwd = document.registerform.repeatpassword.value;
 
-                if(pwd == repeatpwd){
+
+                if(checkPassword(pwd) && pwd == repeatpwd){
                     var data = { 
                         email: email, 
                         password: pwd,
@@ -100,7 +101,16 @@
                         }
                     });
                 } else {
-                    alert ("Registration was unsuccessful, please check your email and password");
+                    alert ("Registration was unsuccessful, please check your email and password. (Your password must have between 6 to 20 characters which contain at least one numeric digit, one uppercase and one lowercase letter !)");
+                }
+            }
+
+            function checkPassword(pwd) { 
+                var passw = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,20}$/;
+                if(pwd.match(passw)) { 
+                    return true;
+                } else { 
+                    return false;
                 }
             }
 
