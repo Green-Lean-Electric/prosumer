@@ -87,7 +87,11 @@
                         email: email, 
                         password: pwd,
                         bufferSize: 10,
-                        bufferFilling: 0
+                        bufferFilling: 0,
+                        productionRatioBuffer : 0.7,
+                        productionRatioMarket : 0.3,
+                        consumptionRatioBuffer : 0.8,
+                        consumptionRatioMarket : 0.2
                     };
                     // call API
                     $.ajax({
