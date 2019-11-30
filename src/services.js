@@ -1,6 +1,7 @@
-const database = require('../../utils/src/mongo.js');
+const database = require('../../utils/src/mongo');
 const http = require('http');
 const querystring = require('querystring');
+const fs = require('fs');
 
 const DATABASE_NAME = 'greenleanelectrics';
 
@@ -22,10 +23,10 @@ exports.connectProsumer = function (data) {
     return database
         .updateOne(undefined, databaseName, collectionName, JSON.parse(data), updateOperation)
         .then((nModified) => {
-            if(nModified != 0){
+            if (nModified !== 0) {
                 console.log(`User connected with token '${token}'`);
-                return JSON.stringify({ token });
-            }else{
+                return JSON.stringify({token});
+            } else {
                 console.log(`User not found`);
                 return false;
             }
@@ -48,21 +49,22 @@ exports.disconnectProsumer = function (token) {
         });
 };
 
-exports.updateData = function (data){
+exports.updateData = function (data) {
     const databaseName = DATABASE_NAME;
     const collectionName = 'prosumers';
 
-    data = JSON.parse(data);console.log(data);
+    data = JSON.parse(data);
+    console.log(data);
     var token = data.token;
     delete data.token;
 
     var updateOperation;
-    if(data.length > 1)
+    if (data.length > 1)
         updateOperation = {
             $set: {
-                    data
-                }
-            };
+                data
+            }
+        };
     else
         updateOperation = {
             $set: data
@@ -71,15 +73,15 @@ exports.updateData = function (data){
     return database
         .updateOne(undefined, databaseName, collectionName, {token}, updateOperation)
         .then((nModified) => {
-            if(nModified != 0){
+            if (nModified !== 0) {
                 console.log(`Ratio modifiés'`);
                 return true;
-            }else{
+            } else {
                 console.log(`User not found or data already with the same values`);
                 return false;
             }
         });
-}
+};
 
 exports.getProsumerLogged = function (token) {
     const databaseName = DATABASE_NAME;
@@ -91,7 +93,7 @@ exports.getProsumerLogged = function (token) {
     return database
         .find(undefined, databaseName, collectionName, prosumer)
         .then((results) => {
-            if(results.length == 1){
+            if (results.length === 1) {
                 delete results[0].password;
                 delete results[0]._id;
                 return results[0];
@@ -100,17 +102,15 @@ exports.getProsumerLogged = function (token) {
         });
 };
 
-exports.uploadProsumerPicture = function (data) {
+exports.uploadProsumerPicture = function (picturePath) {
     const databaseName = DATABASE_NAME;
     const collectionName = 'prosumers';
-//console.log(data);
 
-//TODO: Data on sait pas trop ce que c'est et on sait pas comment le convertir ni comment save l'image sur le serv
     const prosumer = {
-        token : "d99755780ffbd544e25b91f398d0393b" //TODO a passer dans la requete
+        token: 'e217760f5279c6820642f9183ab1206c' //TODO a passer dans la requete
     };
 
-    const updateOperation = {$set: {picture: data}};
+    const updateOperation = {$set: {picture: picturePath}};
 
     return database
         .updateOne(undefined, databaseName, collectionName, prosumer, updateOperation)
@@ -135,9 +135,9 @@ exports.getProsumerElectricityConsumption = function (token) {
     return database
         .find(undefined, databaseName, collectionName, prosumertoken)
         .then((results) => {
-            if(results.length != 0){
+            if (results.length !== 0) {
                 const prosumerId = results[0].email;
-                const simulatorServer = require('../../utils/src/configuration.js')
+                const simulatorServer = require('../../utils/src/configuration')
                     .serversConfiguration
                     .simulator;
 

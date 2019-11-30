@@ -249,7 +249,7 @@
 							              		</div>
 							            	</div>
 							          	</div>
-		              
+
 							        </div>
 
 							    	<!-- Current Electricity Price -->
@@ -293,7 +293,7 @@
 					        </div>
 
 						<!-- ./End Content Row -->
-				      	</div> 
+				      	</div>
 
 				    </div>
 				    <!-- /.container-fluid -->
@@ -343,7 +343,7 @@
 						</button>
 					</div>
 					<div class="modal-body">
-						<form method="post" enctype="multip	art/form-data" >
+						<form method="post" enctype="multipart/form-data" >
 							<div class="custom-file">
 							  	<label class="custom-file-label" for="newPicture">Choose file</label>
 							  	<input type="file" class="custom-file-input" id="newPicture">
@@ -457,7 +457,7 @@
 					if(!isPopUp)
 				   		sendRequests();
 				}, 10000);
-               
+
                 $('#logout').on('click', function(){
                 	$.ajax({
 	                    type: 'GET',
@@ -480,18 +480,20 @@
                 $("#sendPicture").click(function(){
 
 			        var fd = new FormData();
-			        var files = $('#newPicture')[0].files[0];
-			        fd.append('file',files);
+
+			        var file = $('#newPicture')[0].files[0];
+			        fd.append('file',file, file.name);
 			        //fd.append('token',window.localStorage.getItem('token'));
 
 			        $.ajax({
-			            url: 'http://localhost:8081/uploadPicture',
-			            type: 'post',
+			            url: '/uploadPicture',
+			            method: 'POST',
 			            data: fd,
 			            processData: false,
+						contentType: false,
 			            success: function(response){
 			                if(response != 0){
-			                    $("#housePicture").attr("src",response); 
+			                    $("#housePicture").attr("src",response);
 			                    //$(".preview img").show(); // Display image element
 			                }else{
 			                    alert('file not uploaded');
@@ -503,14 +505,14 @@
 	            $('#productionChartform').submit(function () {
 	                var productionRatioBuffer = $('#productionRatioBuffer').val();
 	                var productionRatioMarket = $('#productionRatioMarket').val();
-	                var data = { 
-	                    productionRatioBuffer: productionRatioBuffer/100, 
+	                var data = {
+	                    productionRatioBuffer: productionRatioBuffer/100,
 	                    productionRatioMarket: productionRatioMarket/100,
 	                    token: window.localStorage.getItem('token')
 	                };
 	                // call API
 	                $.ajax({
-	                    type: 'POST',
+	                    method: 'POST',
 	                    url: 'http://localhost:8081/updateData',
 	                    dataType: 'json',
 	                    contentType: 'application/json',
@@ -533,14 +535,14 @@
 	            $('#consumptionChartform').submit(function () {
 	                var consumptionRatioBuffer = $('#consumptionRatioBuffer').val();
 	                var consumptionRatioMarket = $('#consumptionRatioMarket').val();
-	                var data = { 
-	                    consumptionRatioBuffer: consumptionRatioBuffer/100, 
+	                var data = {
+	                    consumptionRatioBuffer: consumptionRatioBuffer/100,
 	                    consumptionRatioMarket: consumptionRatioMarket/100,
 	                    token: window.localStorage.getItem('token')
 	                };
 	                // call API
 	                $.ajax({
-	                    type: 'POST',
+	                    method: 'POST',
 	                    url: 'http://localhost:8081/updateData',
 	                    dataType: 'json',
 	                    contentType: 'application/json',
@@ -564,10 +566,10 @@
 
 			function sendRequests(){
 				$.when(
-					getProsumerLogged(), 
-					getProsumerElectricityConsumption(), 
-					getWindSpeed(), 
-					getCurrentElectricityPrice(), 
+					getProsumerLogged(),
+					getProsumerElectricityConsumption(),
+					getWindSpeed(),
+					getCurrentElectricityPrice(),
 					getElectricityProduction()
 				).done(function(prosumer, electricityConsumption, windSpeed, electricityPrice, electricityProduction){
 					console.log(prosumer[0]);
@@ -600,13 +602,13 @@ console.log(addToBuffer);console.log(removeFromBuffer);
 					if(newBufferFilling > 100)
 						newBufferFilling == 100
 
-	                var data = { 
-	                    bufferFilling:  newBufferFilling, 
+	                var data = {
+	                    bufferFilling:  newBufferFilling,
 	                    token: window.localStorage.getItem('token')
 	                };
 
 					$.ajax({
-	                    type: 'POST',
+	                    method: 'POST',
 	                    url: 'http://localhost:8081/updateData',
 	                    dataType: 'json',
 	                    contentType: 'application/json',
@@ -637,7 +639,7 @@ console.log(addToBuffer);console.log(removeFromBuffer);
                         }
                     }
                 });
-			}    
+			}
 
 			function getProsumerElectricityConsumption() {
 			    return $.ajax({
@@ -650,7 +652,7 @@ console.log(addToBuffer);console.log(removeFromBuffer);
                         }
                     }
                 });
-			}    
+			}
 
 			function getWindSpeed() {
 			    return $.ajax({
@@ -663,7 +665,7 @@ console.log(addToBuffer);console.log(removeFromBuffer);
                         }
                     }
                 });
-			}    
+			}
 
 			function getCurrentElectricityPrice() {
 			    return $.ajax({
@@ -676,7 +678,7 @@ console.log(addToBuffer);console.log(removeFromBuffer);
                         }
                     }
                 });
-			}    
+			}
 
 			function getElectricityProduction() {
 			    return $.ajax({
@@ -689,7 +691,7 @@ console.log(addToBuffer);console.log(removeFromBuffer);
                         }
                     }
                 });
-			}    
+			}
 
 			function round(number){
 				return (Math.round(number * 1000000) / 1000000);

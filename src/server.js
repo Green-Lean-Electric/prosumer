@@ -1,7 +1,7 @@
-const service = require('./services.js');
-const server = require('../../utils/src/server.js');
+const service = require('./services');
+const server = require('../../utils/src/server');
 
-const port = require('../../utils/src/configuration.js')
+const port = require('../../utils/src/configuration')
     .serversConfiguration
     .prosumer
     .port;
@@ -18,7 +18,7 @@ const routes = {
     '/getProsumerLogged': request => service.getProsumerLogged(
         server.getParam(request, 'token')
     ),
-    '/uploadPicture': request => parseParams(request).then( data => service.uploadProsumerPicture(data)),
+    '/uploadPicture': request => server.handleFile(request).then(picturePath => service.uploadProsumerPicture(picturePath)),
     '/updateData': request => parseParams(request).then( data => service.updateData(data)),
 };
 
