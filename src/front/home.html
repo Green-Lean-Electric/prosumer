@@ -373,19 +373,19 @@
 						  	<div class="form-group row">
 							    <label for="consumptonRatioBuffer" class="col-sm-4 col-form-label"><i class="fas fa-circle text-warning"></i>  Buffer (%)</label>
 							    <div class="col-sm-8">
-							      	<input type="number" class="form-control" id="consumptionRatioBuffer" min="0" max="100" >
+							      	<input type="number" class="form-control" id="consumptionRatioBuffer" step="0.5" min="0" max="100" >
 							    </div>
 						  	</div>
 						  	<div class="form-group row">
 							    <label for="consumptonRatioMarket" class="col-sm-4 col-form-label"><i class="fas fa-circle text-danger"></i>  Market (%)</label>
 							    <div class="col-sm-8">
-							      	<input type="number" class="form-control" id="consumptionRatioMarket" min="0" max="100" >
+							      	<input type="number" class="form-control" id="consumptionRatioMarket" step="0.5" min="0" max="100" >
 							    </div>
 						  	</div>
 						</form>
 					</div>
 					<div class="modal-footer">
-						<button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
+						<button id="closeConsumptionChartform" class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
                         <input class="btn btn-primary btn-user btn-block" style="width: fit-content;" type="submit" value="Validate" onclick="$('#consumptionChartform').submit();">
 					</div>
 				</div>
@@ -407,19 +407,19 @@
 						  	<div class="form-group row">
 							    <label for="productionRatioBuffer" class="col-sm-4 col-form-label"><i class="fas fa-circle text-warning"></i>  Buffer (%)</label>
 							    <div class="col-sm-8">
-							      	<input type="number" class="form-control" id="productionRatioBuffer" min="0" max="100" >
+							      	<input type="number" class="form-control" id="productionRatioBuffer" step="0.5" min="0" max="100" >
 							    </div>
 						  	</div>
 						  	<div class="form-group row">
 							    <label for="productionRatioMarket" class="col-sm-4 col-form-label"><i class="fas fa-circle text-danger"></i>  Market (%)</label>
 							    <div class="col-sm-8">
-							      	<input type="number" class="form-control" id="productionRatioMarket" min="0" max="100" >
+							      	<input type="number" class="form-control" id="productionRatioMarket" step="0.5" min="0" max="100" >
 							    </div>
 						  	</div>
 						</form>
 					</div>
 					<div class="modal-footer">
-						<button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
+						<button id="closeProductionChartform" class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
                         <input class="btn btn-primary btn-user btn-block" style="width: fit-content;" type="submit" value="Validate" onclick="$('#productionChartform').submit();">
 					</div>
 				</div>
@@ -501,65 +501,74 @@
 			    });
 
 	            $('#productionChartform').submit(function () {
-	                var productionRatioBuffer = $('#productionRatioBuffer').val();
-	                var productionRatioMarket = $('#productionRatioMarket').val();
-	                var data = { 
-	                    productionRatioBuffer: productionRatioBuffer/100, 
-	                    productionRatioMarket: productionRatioMarket/100,
-	                    token: window.localStorage.getItem('token')
-	                };
-	                // call API
-	                $.ajax({
-	                    type: 'POST',
-	                    url: 'http://localhost:8081/updateData',
-	                    dataType: 'json',
-	                    contentType: 'application/json',
-	                    data: JSON.stringify(data),
-	                    success: function(response){
-	                        if (JSON.parse(response)) {
-	                            alert ("Ratio updated");
-	                            location.reload();
-	                            return true;
-	                        }
-	                        else {
-	                            alert ("Ratio not updated");
-	                            return false;
-	                        }
-	                    }
-	                });
-	                return false;
+	                var productionRatioBuffer = parseFloat(($('#productionRatioBuffer').val() == "" ? 0 : $('#productionRatioBuffer').val())) ;
+	                var productionRatioMarket = parseFloat(($('#productionRatioMarket').val() == "" ? 0 : $('#productionRatioMarket').val())) ;
+	                if((productionRatioBuffer + productionRatioMarket) != 100)
+	                    alert ("The sum must be equal to 100");
+	                else {
+		                var data = { 
+		                    productionRatioBuffer: productionRatioBuffer/100, 
+		                    productionRatioMarket: productionRatioMarket/100,
+		                    token: window.localStorage.getItem('token')
+		                };
+		                // call API
+		                $.ajax({
+		                    type: 'POST',
+		                    url: 'http://localhost:8081/updateData',
+		                    dataType: 'json',
+		                    contentType: 'application/json',
+		                    data: JSON.stringify(data),
+		                    success: function(response){
+		                        if (JSON.parse(response)) {
+		                            alert ("Ratio updated");
+		                            sendRequests();
+	            					$('#closeProductionChartform').click();
+		                            return true;
+		                        }
+		                        else {
+		                            alert ("Ratio not updated because of an error or because these values are the current ones");
+		                            return false;
+		                        }
+		                    }
+		                });
+		            }
+		            return false;
 	            });
 
 	            $('#consumptionChartform').submit(function () {
-	                var consumptionRatioBuffer = $('#consumptionRatioBuffer').val();
-	                var consumptionRatioMarket = $('#consumptionRatioMarket').val();
-	                var data = { 
-	                    consumptionRatioBuffer: consumptionRatioBuffer/100, 
-	                    consumptionRatioMarket: consumptionRatioMarket/100,
-	                    token: window.localStorage.getItem('token')
-	                };
-	                // call API
-	                $.ajax({
-	                    type: 'POST',
-	                    url: 'http://localhost:8081/updateData',
-	                    dataType: 'json',
-	                    contentType: 'application/json',
-	                    data: JSON.stringify(data),
-	                    success: function(response){
-	                        if (JSON.parse(response)) {
-	                            alert ("Ratio updated");
-	                            location.reload();
-	                            return true;
-	                        }
-	                        else {
-	                            alert ("Ratio not updated");
-	                            return false;
-	                        }
-	                    }
-	                });
-	                return false;
+	            	var consumptionRatioBuffer = parseFloat(($('#consumptionRatioBuffer').val() == "" ? 0 : $('#consumptionRatioBuffer').val())) ;
+	                var consumptionRatioMarket = parseFloat(($('#consumptionRatioMarket').val() == "" ? 0 : $('#consumptionRatioMarket').val())) ;
+	                if((consumptionRatioBuffer + consumptionRatioMarket) != 100)
+	                    alert ("The sum must be equal to 100");
+	                else {
+		                var data = { 
+		                    consumptionRatioBuffer: consumptionRatioBuffer/100, 
+		                    consumptionRatioMarket: consumptionRatioMarket/100,
+		                    token: window.localStorage.getItem('token')
+		                };
+		                // call API
+		                $.ajax({
+		                    type: 'POST',
+		                    url: 'http://localhost:8081/updateData',
+		                    dataType: 'json',
+		                    contentType: 'application/json',
+		                    data: JSON.stringify(data),
+		                    success: function(response){
+		                        if (JSON.parse(response)) {
+		                            alert ("Ratio updated");
+		                            sendRequests();
+	            					$('#closeConsumptionChartform').click();
+		                            return true;
+		                        }
+		                        else {
+		                            alert ("Ratio not updated because of an error or because these values are the current ones");
+		                            return false;
+		                        }
+		                    }
+		                });
+		            }
+		            return false;
 	            });
-
 			});
 
 			function sendRequests(){
@@ -571,8 +580,7 @@
 					getElectricityProduction()
 				).done(function(prosumer, electricityConsumption, windSpeed, electricityPrice, electricityProduction){
 					console.log(prosumer[0]);
-/*electricityConsumption[0].electricityConsumption = 5;
-electricityProduction[0] = 1;*/
+
 					var currentBufferFilling = round(('bufferFilling' in prosumer[0] ? prosumer[0].bufferFilling : 0 ));
 					$('#bufferFilling').html(currentBufferFilling);
 					$("#bufferFillingBar").width(currentBufferFilling + "%");
