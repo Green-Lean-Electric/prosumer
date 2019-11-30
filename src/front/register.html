@@ -81,11 +81,17 @@
                 var pwd = document.registerform.password.value;
                 var repeatpwd = document.registerform.repeatpassword.value;
 
-                if(pwd == repeatpwd){
+
+                if(checkPassword(pwd) && pwd == repeatpwd){
                     var data = { 
                         email: email, 
                         password: pwd,
-                        bufferSize: 10
+                        bufferSize: 10,
+                        bufferFilling: 0,
+                        productionRatioBuffer : 0.7,
+                        productionRatioMarket : 0.3,
+                        consumptionRatioBuffer : 0.8,
+                        consumptionRatioMarket : 0.2
                     };
                     // call API
                     $.ajax({
@@ -100,7 +106,16 @@
                         }
                     });
                 } else {
-                    alert ("Registration was unsuccessful, please check your email and password");
+                    alert ("Registration was unsuccessful, please check your email and password. (Your password must have between 6 to 20 characters which contain at least one numeric digit, one uppercase and one lowercase letter !)");
+                }
+            }
+
+            function checkPassword(pwd) { 
+                var passw = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,20}$/;
+                if(pwd.match(passw)) { 
+                    return true;
+                } else { 
+                    return false;
                 }
             }
 

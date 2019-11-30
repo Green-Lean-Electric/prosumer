@@ -5,23 +5,37 @@ const fs = require('fs');
 
 const DATABASE_NAME = 'greenleanelectrics';
 
+function hashPassword(pwd){
+    var hash = 0;
+    if (pwd.length == 0) return hash;
+    for (i = 0; i < pwd.length; i++) {
+        char = pwd.charCodeAt(i);
+        hash = ((hash<<5)-hash)+char;
+        hash = hash & hash; // Convert to 32bit integer
+    }
+    return hash;
+}
+
 exports.insertProsumer = function (data) {
     const databaseName = DATABASE_NAME;
     const collectionName = 'prosumers';
-
+    data = JSON.parse(data);
+    data.password = hashPassword(data.password);
     return database
-        .insertOne(undefined, databaseName, collectionName, JSON.parse(data));
+        .insertOne(undefined, databaseName, collectionName, data);
 };
 
 exports.connectProsumer = function (data) {
     const databaseName = DATABASE_NAME;
     const collectionName = 'prosumers';
+    data = JSON.parse(data);
+    data.password = hashPassword(data.password);
 
     const token = generateToken();
     const updateOperation = {$set: {token}};
 
     return database
-        .updateOne(undefined, databaseName, collectionName, JSON.parse(data), updateOperation)
+        .updateOne(undefined, databaseName, collectionName, data, updateOperation)
         .then((nModified) => {
             if (nModified !== 0) {
                 console.log(`User connected with token '${token}'`);
