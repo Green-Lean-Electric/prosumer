@@ -376,35 +376,7 @@
             <div class="modal-body">Select "Logout" below if you are ready to end your current session.</div>
             <div class="modal-footer">
                 <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
-                <a class="btn btn-primary" id="logout" style="color: #fff;cursor:pointer;">Logout</a>
-            </div>
-        </div>
-    </div>
-</div>
-
-
-<!-- Edit Picture Modal-->
-<div class="modal fade" id="editPictureModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
-     aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Change your house picture</h5>
-                <button class="close" type="button" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">×</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <form method="post" enctype="multipart/form-data">
-                    <div class="custom-file">
-                        <label class="custom-file-label" for="newPicture">Choose file</label>
-                        <input type="file" class="custom-file-input" id="newPicture">
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
-                <a class="btn btn-primary" style="color: #fff;cursor:pointer;" id="sendPicture">Validate</a>
+                <a class="btn btn-primary" id="logout" data-dismiss="modal" style="color: #fff;cursor:pointer;">Logout</a>
             </div>
         </div>
     </div>
@@ -507,12 +479,16 @@
 <!-- Page level plugins -->
 <script src="vendor/chart.js/Chart.min.js"></script>
 
+<script src="js/green-lean-energy.js"></script>
+
 <script>
     // Set new default font family and font color to mimic Bootstrap's default styling
     Chart.defaults.global.defaultFontFamily = 'Nunito', '-apple-system,system-ui,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif';
     Chart.defaults.global.defaultFontColor = '#858796';
 
     $(document).ready(function () {
+        initModals();
+
         sendRequests();
 
         setInterval(function () {
@@ -534,8 +510,7 @@
                 dataType: 'json',
                 contentType: 'application/json',
                 success: function () {
-                    alert("You are well logged out !");
-                    window.location = "index.html";
+                    Templates.Modals.displayModal($('#loggedOutModal'));
                 }
             });
         });
@@ -544,31 +519,6 @@
             var i = $(this).prev('label').clone();
             var file = $('#newPicture')[0].files[0].name;
             $(this).prev('label').text(file);
-        });
-
-        $("#sendPicture").click(function () {
-
-            var fd = new FormData();
-
-            var file = $('#newPicture')[0].files[0];
-            fd.append('file', file, file.name);
-            //fd.append('token',window.localStorage.getItem('token'));
-
-            $.ajax({
-                url: '/uploadPicture',
-                method: 'POST',
-                data: fd,
-                processData: false,
-                contentType: false,
-                success: function (response) {
-                    if (response !== 0) {
-                        $("#housePicture").attr("src", response);
-                        //$(".preview img").show(); // Display image element
-                    } else {
-                        alert('file not uploaded');
-                    }
-                },
-            });
         });
 
         $('#productionChartform').submit(function () {
@@ -675,8 +625,9 @@
             console.log(addToBuffer);
             console.log(removeFromBuffer);
             var newBufferFilling = currentBufferFilling + addToBuffer - removeFromBuffer;
-            if (newBufferFilling > 100)
+            if (newBufferFilling > 100) {
                 newBufferFilling == 100
+            }
 
             var data = {
                 bufferFilling: newBufferFilling,
@@ -826,7 +777,6 @@
         return bufferFilling;
     }
 
-
     function drawConsumptionPieChart(cchart_buffer_percent, cchart_market_percent, electricityConsumption, electricityProduction, consumption_rest) {
         var ctx = document.getElementById("ConsumptionPieChart");
 
@@ -882,7 +832,70 @@
         });
 
         return bufferEmptying;
-    };
+    }
+
+    function retrieveProfilePicture() {
+        $("#housePicture").attr("src", '/retrievePicture?token=' + window.localStorage.getItem('token'));
+    }
+
+    function initModals() {
+        const modalsCreationFunctions = [createUploadPictureModal, createLoggedOutModal];
+        for (const modalCreationFunction of modalsCreationFunctions) {
+            $('body').append(modalCreationFunction());
+        }
+    }
+
+    function createUploadPictureModal() {
+        const body = `
+                <form method="post" enctype="multipart/form-data">
+                    <div class="custom-file">
+                        <label class="custom-file-label" for="newPicture">Choose file</label>
+                        <input type="file" class="custom-file-input" id="newPicture">
+                    </div>
+                </form>
+        `;
+        return Templates.Modals.createModal(
+            'Change your house picture',
+            body,
+            'editPictureModal',
+            [
+                ['Cancel', () => {}],
+                ['Validate', sendPicture]
+            ]);
+    }
+
+    function createLoggedOutModal() {
+        return Templates.Modals.createModal(
+            'Log out',
+            'You are now logged out.',
+            'loggedOutModal',
+            [
+                ['Ok', () => location.assign('/')]
+            ],
+            () => location.assign('/')
+        );
+    }
+
+    function sendPicture() {
+        const fd = new FormData();
+
+        const file = $('#newPicture')[0].files[0];
+        fd.append('file', file, file.name);
+        fd.append('token', window.localStorage.getItem('token'));
+
+        $.ajax({
+            url: '/uploadPicture',
+            method: 'POST',
+            data: fd,
+            processData: false,
+            contentType: false,
+            success: function () {
+                $('#editPictureModal .modal-footer button').click();
+                Templates.Modals.displayModal(Templates.Modals.createModal('Picture uploaded', 'Your picture has been uploaded!', 'uploadedPictureModal', [['Close', () => {}]]));
+                retrieveProfilePicture();
+            },
+        });
+    }
 </script>
 
 </body>

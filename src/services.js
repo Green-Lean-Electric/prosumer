@@ -2,15 +2,16 @@ const database = require('../../utils/src/mongo');
 const http = require('http');
 const querystring = require('querystring');
 const fs = require('fs');
+const server = require('../../utils/src/server');
 
 const DATABASE_NAME = 'greenleanelectrics';
 
-function hashPassword(pwd){
+function hashPassword(pwd) {
     var hash = 0;
     if (pwd.length == 0) return hash;
     for (i = 0; i < pwd.length; i++) {
         char = pwd.charCodeAt(i);
-        hash = ((hash<<5)-hash)+char;
+        hash = ((hash << 5) - hash) + char;
         hash = hash & hash; // Convert to 32bit integer
     }
     return hash;
@@ -19,7 +20,6 @@ function hashPassword(pwd){
 exports.insertProsumer = function (data) {
     const databaseName = DATABASE_NAME;
     const collectionName = 'prosumers';
-    data = JSON.parse(data);
     data.password = hashPassword(data.password);
     return database
         .insertOne(undefined, databaseName, collectionName, data);
@@ -28,7 +28,6 @@ exports.insertProsumer = function (data) {
 exports.connectProsumer = function (data) {
     const databaseName = DATABASE_NAME;
     const collectionName = 'prosumers';
-    data = JSON.parse(data);
     data.password = hashPassword(data.password);
 
     const token = generateToken();
@@ -67,8 +66,6 @@ exports.updateData = function (data) {
     const databaseName = DATABASE_NAME;
     const collectionName = 'prosumers';
 
-    data = JSON.parse(data);
-    console.log(data);
     var token = data.token;
     delete data.token;
 
@@ -88,7 +85,6 @@ exports.updateData = function (data) {
         .updateOne(undefined, databaseName, collectionName, {token}, updateOperation)
         .then((nModified) => {
             if (nModified !== 0) {
-                console.log(`Ratio modifiés'`);
                 return true;
             } else {
                 console.log(`User not found or data already with the same values`);
@@ -116,20 +112,32 @@ exports.getProsumerLogged = function (token) {
         });
 };
 
-exports.uploadProsumerPicture = function (picturePath) {
+exports.uploadProsumerPicture = function (data, picturePath) {
     const databaseName = DATABASE_NAME;
     const collectionName = 'prosumers';
 
     const prosumer = {
-        token: 'e217760f5279c6820642f9183ab1206c' //TODO a passer dans la requete
+        token: data.token
     };
 
     const updateOperation = {$set: {picture: picturePath}};
 
     return database
         .updateOne(undefined, databaseName, collectionName, prosumer, updateOperation)
-        .then(() => {
-            return true;
+        .then(() => server.readFile(picturePath));
+};
+
+exports.retrieveProsumerPicturePath = function (token) {
+    const databaseName = DATABASE_NAME;
+    const collectionName = 'prosumers';
+    const prosumer = {
+        token
+    };
+
+    return database
+        .find(undefined, databaseName, collectionName, prosumer)
+        .then((results) => {
+            return results[0].picture;
         });
 };
 

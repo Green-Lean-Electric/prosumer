@@ -1,26 +1,24 @@
 const service = require('./services');
 const server = require('../../utils/src/server');
+const configuration = require('../../utils/src/configuration');
 
-const port = require('../../utils/src/configuration')
+const port = configuration
     .serversConfiguration
     .prosumer
     .port;
 
 const routes = {
-    '/prosumerSignUp': request => parseParams(request).then( data => service.insertProsumer(data)),
-    '/prosumerLogin': request => parseParams(request).then( data => service.connectProsumer(data)),
-    '/prosumerLogout': request => service.disconnectProsumer(
-        server.getParam(request, 'token')
-    ),
-    '/getProsumerElectricityConsumption': request => service.getProsumerElectricityConsumption(
-        server.getParam(request, 'token')
-    ),
-    '/getProsumerLogged': request => service.getProsumerLogged(
-        server.getParam(request, 'token')
-    ),
-    '/uploadPicture': request => server.handleFile(request).then(picturePath => service.uploadProsumerPicture(picturePath)),
-    '/updateData': request => parseParams(request).then( data => service.updateData(data)),
-};
+        '/prosumerSignUp': (request, parameters) => service.insertProsumer(parameters),
+        '/prosumerLogin': (request, parameters) => service.connectProsumer(parameters),
+        '/prosumerLogout': (request, parameters) => service.disconnectProsumer(parameters.token),
+        '/getProsumerElectricityConsumption': (request, parameters) => service.getProsumerElectricityConsumption(parameters.token),
+        '/getProsumerLogged': (request, parameters) => service.getProsumerLogged(parameters.token),
+        '/uploadPicture': (_, [parameters, picturePath]) => service.uploadProsumerPicture(parameters, picturePath),
+        '/retrievePicture': (request, parameters, res) => service.retrieveProsumerPicturePath(parameters.token)
+            .then(path => server.serveStaticFile(path, res)),
+        '/updateData': (request, parameters) => service.updateData(parameters),
+    }
+;
 
 const staticFiles = {
     '/test': __dirname + '/files/file.txt',
@@ -28,15 +26,3 @@ const staticFiles = {
 };
 
 server.createServer(staticFiles, routes, port, [__dirname + "/front"]);
-
-function parseParams(req){
-    let data  = [];
-    req.on('data', chunk => {
-        data.push(chunk);
-    });
-    return new Promise((resolve, reject) => {
-        req.on('end', () => {
-            resolve(data);
-        });
-    });
-}
