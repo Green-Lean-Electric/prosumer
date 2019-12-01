@@ -530,7 +530,7 @@
         $('#logout').on('click', function () {
             $.ajax({
                 type: 'GET',
-                url: 'http://localhost:8081/prosumerLogout?token=' + window.localStorage.getItem('token'),
+                url: '/prosumerLogout?token=' + window.localStorage.getItem('token'),
                 dataType: 'json',
                 contentType: 'application/json',
                 success: function () {
@@ -585,7 +585,7 @@
                 // call API
                 $.ajax({
                     method: 'POST',
-                    url: 'http://localhost:8081/updateData',
+                    url: '/updateData',
                     dataType: 'json',
                     contentType: 'application/json',
                     data: JSON.stringify(data),
@@ -619,7 +619,7 @@
                 // call API
                 $.ajax({
                     method: 'POST',
-                    url: 'http://localhost:8081/updateData',
+                    url: '/updateData',
                     dataType: 'json',
                     contentType: 'application/json',
                     data: JSON.stringify(data),
@@ -685,7 +685,7 @@
 
             $.ajax({
                 method: 'POST',
-                url: 'http://localhost:8081/updateData',
+                url: '/updateData',
                 dataType: 'json',
                 contentType: 'application/json',
                 data: JSON.stringify(data),
@@ -704,7 +704,7 @@
     function getProsumerLogged() {
         return $.ajax({
             type: 'GET',
-            url: 'http://localhost:8081/getProsumerLogged?token=' + window.localStorage.getItem('token'),
+            url: '/getProsumerLogged?token=' + window.localStorage.getItem('token'),
             dataType: 'json',
             success: function (prosumer) {
                 if (prosumer == false) {
@@ -719,7 +719,7 @@
     function getProsumerElectricityConsumption() {
         return $.ajax({
             type: 'GET',
-            url: 'http://localhost:8081/getProsumerElectricityConsumption?token=' + window.localStorage.getItem('token'),
+            url: '/getProsumerElectricityConsumption?token=' + window.localStorage.getItem('token'),
             dataType: 'json',
             success: function (response) {
                 if (response) {
