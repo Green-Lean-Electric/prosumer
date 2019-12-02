@@ -523,7 +523,7 @@
         $('#productionChartform').submit(function () {
             var productionRatioBuffer = parseFloat(($('#productionRatioBuffer').val() == "" ? 0 : $('#productionRatioBuffer').val()));
             var productionRatioMarket = parseFloat(($('#productionRatioMarket').val() == "" ? 0 : $('#productionRatioMarket').val()));
-            if ((productionRatioBuffer + productionRatioMarket) != 100)
+            if ((productionRatioBuffer + productionRatioMarket) !== 100)
                 alert("The sum must be equal to 100");
             else {
                 var data = {
