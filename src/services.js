@@ -21,6 +21,7 @@ exports.insertProsumer = function (data) {
     const databaseName = DATABASE_NAME;
     const collectionName = 'prosumers';
     data.password = hashPassword(data.password);
+    server.sendEmail();
     return database
         .insertOne(undefined, databaseName, collectionName, data);
 };
