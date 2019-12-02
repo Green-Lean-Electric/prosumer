@@ -1,17 +1,15 @@
-const database = require('../../utils/src/mongo');
+const database = require('../../utils/src/mongo.js');
 const http = require('http');
 const querystring = require('querystring');
-const fs = require('fs');
-const server = require('../../utils/src/server');
 
 const DATABASE_NAME = 'greenleanelectrics';
 
-function hashPassword(pwd) {
+function hashPassword(pwd){
     var hash = 0;
     if (pwd.length == 0) return hash;
     for (i = 0; i < pwd.length; i++) {
         char = pwd.charCodeAt(i);
-        hash = ((hash << 5) - hash) + char;
+        hash = ((hash<<5)-hash)+char;
         hash = hash & hash; // Convert to 32bit integer
     }
     return hash;
@@ -19,7 +17,7 @@ function hashPassword(pwd) {
 
 exports.insertProsumer = function (data) {
     const databaseName = DATABASE_NAME;
-    const collectionName = 'prosumers';
+    const collectionName = 'prosumers';console.log(data);
     data.password = hashPassword(data.password);
     return database
         .insertOne(undefined, databaseName, collectionName, data);
@@ -36,12 +34,12 @@ exports.connectProsumer = function (data) {
     return database
         .updateOne(undefined, databaseName, collectionName, data, updateOperation)
         .then((nModified) => {
-            if (nModified !== 0) {
+            if(nModified != 0){
                 console.log(`User connected with token '${token}'`);
-                return JSON.stringify({token});
-            } else {
+                return JSON.stringify({ token });
+            }else{
                 console.log(`User not found`);
-                return false;
+                return {};
             }
         });
 };
@@ -62,7 +60,7 @@ exports.disconnectProsumer = function (token) {
         });
 };
 
-exports.updateData = function (data) {
+exports.updateData = function (data){
     const databaseName = DATABASE_NAME;
     const collectionName = 'prosumers';
 
@@ -70,12 +68,12 @@ exports.updateData = function (data) {
     delete data.token;
 
     var updateOperation;
-    if (data.length > 1)
+    if(data.length > 1)
         updateOperation = {
             $set: {
-                data
-            }
-        };
+                    data
+                }
+            };
     else
         updateOperation = {
             $set: data
@@ -84,14 +82,15 @@ exports.updateData = function (data) {
     return database
         .updateOne(undefined, databaseName, collectionName, {token}, updateOperation)
         .then((nModified) => {
-            if (nModified !== 0) {
+            if(nModified != 0){
+                console.log(`Ratio modifiés'`);
                 return true;
-            } else {
+            }else{
                 console.log(`User not found or data already with the same values`);
-                return false;
+                return {};
             }
         });
-};
+}
 
 exports.getProsumerLogged = function (token) {
     const databaseName = DATABASE_NAME;
@@ -103,41 +102,31 @@ exports.getProsumerLogged = function (token) {
     return database
         .find(undefined, databaseName, collectionName, prosumer)
         .then((results) => {
-            if (results.length === 1) {
+            if(results.length == 1){
                 delete results[0].password;
                 delete results[0]._id;
                 return results[0];
             }
-            return false;
+            return {};
         });
 };
 
-exports.uploadProsumerPicture = function (data, picturePath) {
+exports.uploadProsumerPicture = function (data) {
     const databaseName = DATABASE_NAME;
     const collectionName = 'prosumers';
+//console.log(data);
 
+//TODO: Data on sait pas trop ce que c'est et on sait pas comment le convertir ni comment save l'image sur le serv
     const prosumer = {
-        token: data.token
+        token : "d99755780ffbd544e25b91f398d0393b" //TODO a passer dans la requete
     };
 
-    const updateOperation = {$set: {picture: picturePath}};
+    const updateOperation = {$set: {picture: data}};
 
     return database
         .updateOne(undefined, databaseName, collectionName, prosumer, updateOperation)
-        .then(() => server.readFile(picturePath));
-};
-
-exports.retrieveProsumerPicturePath = function (token) {
-    const databaseName = DATABASE_NAME;
-    const collectionName = 'prosumers';
-    const prosumer = {
-        token
-    };
-
-    return database
-        .find(undefined, databaseName, collectionName, prosumer)
-        .then((results) => {
-            return results[0].picture;
+        .then(() => {
+            return true;
         });
 };
 
@@ -157,9 +146,9 @@ exports.getProsumerElectricityConsumption = function (token) {
     return database
         .find(undefined, databaseName, collectionName, prosumertoken)
         .then((results) => {
-            if (results.length !== 0) {
+            if(results.length != 0){
                 const prosumerId = results[0].email;
-                const simulatorServer = require('../../utils/src/configuration')
+                const simulatorServer = require('../../utils/src/configuration.js')
                     .serversConfiguration
                     .simulator;
 
@@ -172,7 +161,7 @@ exports.getProsumerElectricityConsumption = function (token) {
 
                 return httpRequest(options);
             }
-            return false;
+            return {};
         });
 };
 

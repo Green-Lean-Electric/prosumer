@@ -498,7 +498,6 @@
                     isPopUp = true;
                 }
             });
-            console.log(isPopUp);
             if (!isPopUp)
                 sendRequests();
         }, 10000);
@@ -540,7 +539,7 @@
                     contentType: 'application/json',
                     data: JSON.stringify(data),
                     success: function (response) {
-                        if (JSON.parse(response)) {
+                        if (!$.isEmptyObject(JSON.parse(response))) {
                             alert("Ratio updated");
                             sendRequests();
                             $('#closeProductionChartform').click();
@@ -598,7 +597,7 @@
             getCurrentElectricityPrice(),
             getElectricityProduction()
         ).done(function (prosumer, electricityConsumption, windSpeed, electricityPrice, electricityProduction) {
-            console.log(prosumer[0]);
+            console.log(prosumer);
 
             var currentBufferFilling = round(('bufferFilling' in prosumer[0] ? prosumer[0].bufferFilling : 0));
             $('#bufferFilling').html(currentBufferFilling);
@@ -654,11 +653,11 @@
 
     function getProsumerLogged() {
         return $.ajax({
-            type: 'GET',
+            method: 'GET',
             url: '/getProsumerLogged?token=' + window.localStorage.getItem('token'),
             dataType: 'json',
             success: function (prosumer) {
-                if (prosumer == false) {
+                if ($.isEmptyObject(prosumer)) {
                     window.location = "index.html";
                 } else {
                     $('#accountTitle').html("Dashboard - " + prosumer.email);
@@ -669,11 +668,11 @@
 
     function getProsumerElectricityConsumption() {
         return $.ajax({
-            type: 'GET',
+            method: 'GET',
             url: '/getProsumerElectricityConsumption?token=' + window.localStorage.getItem('token'),
             dataType: 'json',
             success: function (response) {
-                if (response) {
+                if (!$.isEmptyObject(response)) {
                     $('#currentConsumption').html(round(response.electricityConsumption) + " kwh");
                 }
             }
@@ -682,7 +681,7 @@
 
     function getWindSpeed() {
         return $.ajax({
-            type: 'GET',
+            method: 'GET',
             url: 'http://localhost:8080/getWindSpeed',
             dataType: 'json',
             success: function (response) {
@@ -695,7 +694,7 @@
 
     function getCurrentElectricityPrice() {
         return $.ajax({
-            type: 'GET',
+            method: 'GET',
             url: 'http://localhost:8080/getCurrentElectricityPrice',
             dataType: 'json',
             success: function (response) {
@@ -708,7 +707,7 @@
 
     function getElectricityProduction() {
         return $.ajax({
-            type: 'GET',
+            method: 'GET',
             url: 'http://localhost:8080/getElectricityProduction',
             dataType: 'json',
             success: function (response) {

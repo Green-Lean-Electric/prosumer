@@ -93,13 +93,17 @@
                     dataType: 'json',
                     contentType: 'application/json',
                     data: JSON.stringify(data),
-                    success: function(response){
-                        var object = JSON.parse(response);
-                        if (object.token) {
-                            window.localStorage.setItem('token', object.token);
-                            window.location = "home.html";
-                        }
-                        else {
+                    success: function(response){console.log(response);console.log(JSON.parse(response));
+                        if(!$.isEmptyObject(JSON.parse(response))){
+                            var object = JSON.parse(response);
+                            if (object.token) {
+                                window.localStorage.setItem('token', object.token);
+                                window.location = "home.html";
+                            }else {
+                                alert ("Login was unsuccessful, please check your email and password");
+                                return false;
+                            }
+                        }else{
                             alert ("Login was unsuccessful, please check your email and password");
                             return false;
                         }
