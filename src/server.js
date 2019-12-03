@@ -17,6 +17,8 @@ const routes = {
         '/retrievePicture': (request, parameters, res) => service.retrieveProsumerPicturePath(parameters.token)
             .then(path => server.serveStaticFile(path, res)),
         '/updateData': (request, parameters) => service.updateData(parameters),
+        '/accountVerification': (request, parameters, res) => service.accountVerification(parameters.registrationToken)
+            .then(path => server.serveStaticFile(path, res))
     }
 ;
 
