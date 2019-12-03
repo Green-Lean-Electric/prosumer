@@ -21,30 +21,77 @@ exports.insertProsumer = function (data) {
     const databaseName = DATABASE_NAME;
     const collectionName = 'prosumers';
     data.password = hashPassword(data.password);
-    server.sendEmail();
+
+    var registrationToken = generateToken();
+    data.registrationToken = registrationToken;
+
+    server.sendEmail(
+        "no-reply@greenleanelectric.com",
+        data.email,
+        "Account Verification",
+        "To activate you account click on the following link : "+"localhost:8081/accountVerification?registrationToken="+registrationToken
+    );
     return database
         .insertOne(undefined, databaseName, collectionName, data);
 };
+
+exports.accountVerification = function (registrationToken){console.log(registrationToken);
+    const databaseName = DATABASE_NAME;
+    const collectionName = 'prosumers';
+    const updateOperation = { $unset: {"registrationToken": ""}};
+
+    return database
+        .updateOne(undefined, databaseName, collectionName, {registrationToken}, updateOperation)
+        .then((nModified) => {
+            if (nModified !== 0) {
+                console.log(`User activated'`);
+                return __dirname + "\\front\\account-activation-success.html";
+            } else {
+                console.log(`User not found`);
+                return __dirname + "\\front\\account-activation-failure.html";
+            }
+        });
+}
 
 exports.connectProsumer = function (data) {
     const databaseName = DATABASE_NAME;
     const collectionName = 'prosumers';
     data.password = hashPassword(data.password);
 
-    const token = generateToken();
-    const updateOperation = {$set: {token}};
-
-    return database
-        .updateOne(undefined, databaseName, collectionName, data, updateOperation)
-        .then((nModified) => {
-            if (nModified !== 0) {
-                console.log(`User connected with token '${token}'`);
-                return JSON.stringify({token});
-            } else {
-                console.log(`User not found`);
-                return {};
+    return database.find(undefined, databaseName, collectionName, data)
+        .then((results) => {
+            if (results.length === 1) {
+                return results[0];
             }
-        });
+            return {};
+        }).then((results) => {
+
+console.log(results);
+
+            if(!Object.keys(results).length)
+                return {error: "Login was unsuccessful, please check your email and password"};
+            else if(results.hasOwnProperty("registrationToken"))
+                return {error: "Account not activated, check your mailbox."};
+            else{
+                const token = generateToken();
+                const updateOperation = {$set: {token}};
+
+                return database
+                    .updateOne(undefined, databaseName, collectionName, data, updateOperation)
+                    .then((nModified) => {
+                        if (nModified !== 0) {
+                            console.log(`User connected with token '${token}'`);
+                            return {token};
+                        } else {
+                            console.log(`User not found`);
+                            return {};
+                        }
+                    });
+            }
+        }); 
+
+
+    
 };
 
 exports.disconnectProsumer = function (token) {

@@ -104,19 +104,18 @@
             data: JSON.stringify(data),
             success: function (response) {
                 unblockView();
-                if (!$.isEmptyObject(JSON.parse(response))) {
-                    var object = JSON.parse(response);
-                    if (object.token) {
-                        window.localStorage.setItem('token', object.token);
+console.log(response);
+                    //var object = JSON.parse(response);
+                    if(response.hasOwnProperty("error")){
+                        alert(response.error);
+                        return false;
+                    } else if (response.token) {
+                        window.localStorage.setItem('token', response.token);
                         window.location = "home.html";
                     } else {
                         alert("Login was unsuccessful, please check your email and password");
                         return false;
                     }
-                } else {
-                    alert("Login was unsuccessful, please check your email and password");
-                    return false;
-                }
             }
         });
     }
