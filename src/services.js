@@ -3,6 +3,7 @@ const http = require('http');
 const querystring = require('querystring');
 const fs = require('fs');
 const server = require('../../utils/src/server');
+const configuration = require('../../utils/src/configuration');
 
 const DATABASE_NAME = 'greenleanelectrics';
 
@@ -28,14 +29,15 @@ exports.insertProsumer = function (data) {
     return database.find(undefined, databaseName, collectionName, {"email":data.email})
         .then((results) => {
             if (results.length <= 1) {
-                console.log("This email is already used.");
-                return {error : "This email is already used."};
+                console.log('This email is already used.');
+                return {error : 'This email is already used.'};
             } else {
+                const hostname = configuration.serversConfiguration.prosumer.hostname;
                 server.sendEmail(
-                    "no-reply@greenleanelectric.com",
+                    'no-reply@greenleanelectric.com',
                     data.email,
-                    "Account Verification",//TODO Change url
-                    "To activate you account click on the following link : <button onclick=<\"http://145.239.75.80:8081//accountVerification?registrationToken="+registrationToken +"\">Click Here</button>"
+                    'Account Verification',//TODO Change url
+                    `To activate your account click on the following link : <button onclick=<"http://${hostname}//accountVerification?registrationToken=${registrationToken}">Click Here</button>`
                 );
     
                 return database
@@ -61,7 +63,7 @@ exports.accountVerification = function (registrationToken){console.log(registrat
                 return __dirname + "\\front\\account-activation-failure.html";
             }
         });
-}
+};
 
 exports.connectProsumer = function (data) {
     const databaseName = DATABASE_NAME;
