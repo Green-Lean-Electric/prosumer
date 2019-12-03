@@ -37,7 +37,7 @@ exports.insertProsumer = function (data) {
                     'no-reply@greenleanelectric.com',
                     data.email,
                     'Account Verification',//TODO Change url
-                    `To activate your account click on the following link : <button onclick=<"http://${hostname}//accountVerification?registrationToken=${registrationToken}">Click Here</button>`
+                    `To activate your account click on the following link : <a href="http://${hostname}//accountVerification?registrationToken=${registrationToken}">Click Here</a>`
                 );
     
                 return database
