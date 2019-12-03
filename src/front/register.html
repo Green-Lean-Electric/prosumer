@@ -101,8 +101,13 @@
                         contentType: 'application/json',
                         data: JSON.stringify(data),
                         success: function(response){
-                            alert("Well registered, now login !");
-                            window.location = "index.html";
+                            if(response.hasOwnProperty("error")){
+                                alert(response.error);
+                                return false;
+                            } else {
+                                alert("Well registered, now login !");
+                                window.location = "index.html";
+                            }
                         }
                     });
                 } else {

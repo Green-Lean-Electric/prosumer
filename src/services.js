@@ -24,15 +24,25 @@ exports.insertProsumer = function (data) {
 
     var registrationToken = generateToken();
     data.registrationToken = registrationToken;
+    
+    return database.find(undefined, databaseName, collectionName, {"email":data.email})
+        .then((results) => {
+            if (results.length <= 1) {
+                console.log("This email is already used.");
+                return {error : "This email is already used."};
+            } else {
+                server.sendEmail(
+                    "no-reply@greenleanelectric.com",
+                    data.email,
+                    "Account Verification",//TODO Change url
+                    "To activate you account click on the following link : <button onclick=<\"localhost:8081/accountVerification?registrationToken="+registrationToken +"\">Click Here</button>"
+                );
+    
+                return database
+                    .insertOne(undefined, databaseName, collectionName, data);
+            }
+        });
 
-    server.sendEmail(
-        "no-reply@greenleanelectric.com",
-        data.email,
-        "Account Verification",//TODO Change url
-        "To activate you account click on the following link : <button onclick=<\"localhost:8081/accountVerification?registrationToken="+registrationToken +"\">Click Here</button>"
-    );
-    return database
-        .insertOne(undefined, databaseName, collectionName, data);
 };
 
 exports.accountVerification = function (registrationToken){console.log(registrationToken);
