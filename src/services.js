@@ -28,8 +28,8 @@ exports.insertProsumer = function (data) {
     server.sendEmail(
         "no-reply@greenleanelectric.com",
         data.email,
-        "Account Verification",
-        "To activate you account click on the following link : "+"localhost:8081/accountVerification?registrationToken="+registrationToken
+        "Account Verification",//TODO Change url
+        "To activate you account click on the following link : <button onclick=<\"localhost:8081/accountVerification?registrationToken="+registrationToken +"\">Click Here</button>"+
     );
     return database
         .insertOne(undefined, databaseName, collectionName, data);
