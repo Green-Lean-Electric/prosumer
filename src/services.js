@@ -27,7 +27,7 @@ exports.insertProsumer = function (data) {
     
     return database.find(undefined, databaseName, collectionName, {"email":data.email})
         .then((results) => {
-            if (results.length <= 1) {
+            if (results.length >= 1) {
                 console.log("This email is already used.");
                 return {error : "This email is already used."};
             } else {
