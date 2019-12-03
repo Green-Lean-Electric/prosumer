@@ -27,4 +27,4 @@ const staticFiles = {
     '/': __dirname + '/front/index.html'
 };
 
-server.createServer(staticFiles, routes, port, [__dirname + "/front", __dirname + "\\..\\..\\utils\\src\\front"]);
+server.createServer(staticFiles, routes, port, [__dirname + "/front", __dirname + "/../../utils/src/front"]);
