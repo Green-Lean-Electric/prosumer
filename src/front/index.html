@@ -19,6 +19,7 @@
     <!-- Custom styles for this template-->
     <link href="css/sb-admin-2.min.css" rel="stylesheet">
 
+    <link href="css/green-lean-electrics.css" rel="stylesheet">
 </head>
 
 <body class="bg-gradient-primary">
@@ -82,8 +83,12 @@
 <!-- Custom scripts for all pages-->
 <script src="js/sb-admin-2.min.js"></script>
 
+<script src="js/green-lean-electrics.js"></script>
+
 <script>
     function validateForm() {
+        blockView();
+
         var email = document.loginform.email.value;
         var pw = document.loginform.password.value;
         var data = {
@@ -98,6 +103,7 @@
             contentType: 'application/json',
             data: JSON.stringify(data),
             success: function (response) {
+                unblockView();
                 if (!$.isEmptyObject(JSON.parse(response))) {
                     var object = JSON.parse(response);
                     if (object.token) {
