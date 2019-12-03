@@ -57,10 +57,10 @@ exports.accountVerification = function (registrationToken){console.log(registrat
         .then((nModified) => {
             if (nModified !== 0) {
                 console.log(`User activated'`);
-                return __dirname + "\\front\\account-activation-success.html";
+                return __dirname + "/front/account-activation-success.html";
             } else {
                 console.log(`User not found`);
-                return __dirname + "\\front\\account-activation-failure.html";
+                return __dirname + "/front/account-activation-failure.html";
             }
         });
 };
