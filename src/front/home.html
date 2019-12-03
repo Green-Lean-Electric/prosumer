@@ -684,7 +684,7 @@
     function getWindSpeed() {
         return $.ajax({
             method: 'GET',
-            url: 'http://localhost:8080/getWindSpeed',
+            url: `http://${getDomain()}:8080/getWindSpeed`,
             dataType: 'json',
             success: function (response) {
                 if (response) {
@@ -697,7 +697,7 @@
     function getCurrentElectricityPrice() {
         return $.ajax({
             method: 'GET',
-            url: 'http://localhost:8080/getCurrentElectricityPrice',
+            url: `http://${getDomain()}:8080/getCurrentElectricityPrice`,
             dataType: 'json',
             success: function (response) {
                 if (response) {
@@ -710,7 +710,7 @@
     function getElectricityProduction() {
         return $.ajax({
             method: 'GET',
-            url: 'http://localhost:8080/getElectricityProduction',
+            url: `http://${getDomain()}:8080/getElectricityProduction`,
             dataType: 'json',
             success: function (response) {
                 if (response !== false) {
