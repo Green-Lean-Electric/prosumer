@@ -32,12 +32,12 @@ exports.insertProsumer = function (data) {
                 console.log('This email is already used.');
                 return {error : 'This email is already used.'};
             } else {
-                const hostname = configuration.serversConfiguration.prosumer.hostname;
+                const url = `${configuration.serversConfiguration.prosumer.hostname}:${configuration.serversConfiguration.prosumer.port}`;
                 server.sendEmail(
                     'no-reply@greenleanelectric.com',
                     data.email,
                     'Account Verification',//TODO Change url
-                    `To activate your account click on the following link : <a href="http://${hostname}//accountVerification?registrationToken=${registrationToken}">Click Here</a>`
+                    `To activate your account click on the following link : <a href="http://${url}/accountVerification?registrationToken=${registrationToken}">Click Here</a>`
                 );
     
                 return database
