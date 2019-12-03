@@ -526,7 +526,7 @@
             var productionRatioBuffer = parseFloat(($('#productionRatioBuffer').val() == "" ? 0 : $('#productionRatioBuffer').val()));
             var productionRatioMarket = parseFloat(($('#productionRatioMarket').val() == "" ? 0 : $('#productionRatioMarket').val()));
             if ((productionRatioBuffer + productionRatioMarket) !== 100)
-                alert("The sum must be equal to 100");
+                Templates.Modals.displayModal(createMessageModal("Error","The sum must be equal to 100", "productionRatioErrorModal"));
             else {
                 var data = {
                     productionRatioBuffer: productionRatioBuffer / 100,
@@ -542,12 +542,12 @@
                     data: JSON.stringify(data),
                     success: function (response) {
                         if (!$.isEmptyObject(JSON.parse(response))) {
-                            alert("Ratio updated");
+                			Templates.Modals.displayModal(createMessageModal("Messsage","Ratio updated", "ratioUpdatedModal"));
                             sendRequests();
                             $('#closeProductionChartform').click();
                             return true;
                         } else {
-                            alert("Ratio not updated because of an error or because these values are the current ones");
+                        	Templates.Modals.displayModal(createMessageModal("Error","Ratio not updated because of an error or because these values are the current ones", "ratioNotUpdatedModal"));
                             return false;
                         }
                     }
@@ -560,7 +560,7 @@
             var consumptionRatioBuffer = parseFloat(($('#consumptionRatioBuffer').val() == "" ? 0 : $('#consumptionRatioBuffer').val()));
             var consumptionRatioMarket = parseFloat(($('#consumptionRatioMarket').val() == "" ? 0 : $('#consumptionRatioMarket').val()));
             if ((consumptionRatioBuffer + consumptionRatioMarket) != 100)
-                alert("The sum must be equal to 100");
+                Templates.Modals.displayModal(createMessageModal("Error", "The sum must be equal to 100", "consumptionRatioErrorModal"));
             else {
                 var data = {
                     consumptionRatioBuffer: consumptionRatioBuffer / 100,
@@ -576,12 +576,12 @@
                     data: JSON.stringify(data),
                     success: function (response) {
                         if (JSON.parse(response)) {
-                            alert("Ratio updated");
+                            Templates.Modals.displayModal(createMessageModal("Messsage","Ratio updated", "ratioUpdatedModal"));
                             sendRequests();
                             $('#closeConsumptionChartform').click();
                             return true;
                         } else {
-                            alert("Ratio not updated because of an error or because these values are the current ones");
+                        	Templates.Modals.displayModal(createMessageModal("Error","Ratio not updated because of an error or because these values are the current ones", "ratioNotUpdatedModal"));
                             return false;
                         }
                     }
@@ -840,7 +840,7 @@
     }
 
     function initModals() {
-        const modalsCreationFunctions = [createUploadPictureModal, createLoggedOutModal];
+        const modalsCreationFunctions = [createUploadPictureModal, createLoggedOutModal, createMessageModal];
         for (const modalCreationFunction of modalsCreationFunctions) {
             $('body').append(modalCreationFunction());
         }

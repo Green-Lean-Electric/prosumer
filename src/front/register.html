@@ -102,15 +102,15 @@
                         data: JSON.stringify(data),
                         success: function(response){
                             if(response.hasOwnProperty("error")){
-                                alert(response.error);
+                                Templates.Modals.displayModal(createMessageModal("Error",response.error, "signUpErrorModal"));
                                 return false;
                             } else {
-                                alert("Well registered, now check your email to active your account !");
+                                Templates.Modals.displayModal(createMessageModal("Welcome !","Well registered, now check your email to active your account !", "signUpSuccessModal"));
                             }
                         }
                     });
                 } else {
-                    alert ("Registration was unsuccessful, please check your email and password. (Your password must have between 6 to 20 characters which contain at least one numeric digit, one uppercase and one lowercase letter !)");
+                    Templates.Modals.displayModal(createMessageModal("Error","Registration was unsuccessful, please check your email and password. (Your password must have between 6 to 20 characters which contain at least one numeric digit, one uppercase and one lowercase letter !)", "signUpWrongDatasModal"));
                 }
             }
 

@@ -107,13 +107,13 @@
 console.log(response);
                     //var object = JSON.parse(response);
                     if(response.hasOwnProperty("error")){
-                        alert(response.error);
+                        Templates.Modals.displayModal(createMessageModal("Error",response.error, "loginErrorModal"));
                         return false;
                     } else if (response.token) {
                         window.localStorage.setItem('token', response.token);
                         window.location = "home.html";
                     } else {
-                        alert("Login was unsuccessful, please check your email and password");
+                        Templates.Modals.displayModal(createMessageModal("Error","Login was unsuccessful, please check your email and password", "loginFailModal"));
                         return false;
                     }
             }
