@@ -28,9 +28,9 @@ exports.insertProsumer = function (data) {
     
     return database.find(undefined, databaseName, collectionName, {"email":data.email})
         .then((results) => {
-            if (results.length <= 1) {
-                console.log('This email is already used.');
-                return {error : 'This email is already used.'};
+            if (results.length >= 1) {
+                console.log("This email is already used.");
+                return {error : "This email is already used."};
             } else {
                 const url = `${configuration.serversConfiguration.prosumer.hostname}:${configuration.serversConfiguration.prosumer.port}`;
                 server.sendEmail(
