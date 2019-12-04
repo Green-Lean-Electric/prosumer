@@ -25,12 +25,12 @@ exports.insertProsumer = function (data) {
 
     var registrationToken = generateToken();
     data.registrationToken = registrationToken;
-    
-    return database.find(undefined, databaseName, collectionName, {"email":data.email})
+
+    return database.find(undefined, databaseName, collectionName, {"email": data.email})
         .then((results) => {
             if (results.length >= 1) {
                 console.log("This email is already used.");
-                return {error : "This email is already used."};
+                return {error: "This email is already used."};
             } else {
                 const url = `${configuration.serversConfiguration.prosumer.hostname}:${configuration.serversConfiguration.prosumer.port}`;
                 server.sendEmail(
@@ -39,7 +39,7 @@ exports.insertProsumer = function (data) {
                     'Account Verification',//TODO Change url
                     `To activate your account click on the following link : <a href="http://${url}/accountVerification?registrationToken=${registrationToken}">Click Here</a>`
                 );
-    
+
                 return database
                     .insertOne(undefined, databaseName, collectionName, data);
             }
@@ -47,10 +47,11 @@ exports.insertProsumer = function (data) {
 
 };
 
-exports.accountVerification = function (registrationToken){console.log(registrationToken);
+exports.accountVerification = function (registrationToken) {
+    console.log(registrationToken);
     const databaseName = DATABASE_NAME;
     const collectionName = 'prosumers';
-    const updateOperation = { $unset: {"registrationToken": ""}};
+    const updateOperation = {$unset: {"registrationToken": ""}};
 
     return database
         .updateOne(undefined, databaseName, collectionName, {registrationToken}, updateOperation)
@@ -78,13 +79,13 @@ exports.connectProsumer = function (data) {
             return {};
         }).then((results) => {
 
-console.log(results);
+            console.log(results);
 
-            if(!Object.keys(results).length)
+            if (!Object.keys(results).length)
                 return {error: "Login was unsuccessful, please check your email and password"};
-            else if(results.hasOwnProperty("registrationToken"))
+            else if (results.hasOwnProperty("registrationToken"))
                 return {error: "Account not activated, check your mailbox."};
-            else{
+            else {
                 const token = generateToken();
                 const updateOperation = {$set: {token}};
 
@@ -100,10 +101,9 @@ console.log(results);
                         }
                     });
             }
-        }); 
+        });
 
 
-    
 };
 
 exports.disconnectProsumer = function (token) {
@@ -180,11 +180,17 @@ exports.uploadProsumerPicture = function (data, picturePath) {
         token: data.token
     };
 
-    const updateOperation = {$set: {picture: picturePath}};
+    const extension = server.findExtension(picturePath);
+    const newPath = configuration.uploadDirectory + new Date().getTime() + (
+        extension
+            ? '.' + extension
+            : ''
+    );
 
-    return database
-        .updateOne(undefined, databaseName, collectionName, prosumer, updateOperation)
-        .then(() => server.readFile(picturePath));
+    return server.moveFile(picturePath, newPath)
+        .then(() => database
+            .updateOne(undefined, databaseName, collectionName, prosumer, {$set: {picture: newPath}})
+            .then(() => server.readFile(newPath)));
 };
 
 exports.retrieveProsumerPicturePath = function (token) {
@@ -198,7 +204,8 @@ exports.retrieveProsumerPicturePath = function (token) {
         .find(undefined, databaseName, collectionName, prosumer)
         .then((results) => {
             return results[0].picture;
-        });
+        })
+        .catch(() => {return undefined;});
 };
 
 function generateToken() {

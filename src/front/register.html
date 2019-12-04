@@ -18,6 +18,7 @@
         <!-- Custom styles for this template-->
         <link href="css/sb-admin-2.min.css" rel="stylesheet">
 
+        <link href="css/green-lean-electrics.css" rel="stylesheet">
     </head>
 
     <body class="bg-gradient-primary">
@@ -75,6 +76,8 @@
         <!-- Custom scripts for all pages-->
         <script src="js/sb-admin-2.min.js"></script>
 
+        <script src="js/green-lean-electrics.js"></script>
+
         <script>
             function validateForm() {
                 var email = document.registerform.email.value;
@@ -82,8 +85,9 @@
                 var repeatpwd = document.registerform.repeatpassword.value;
 
 
-                if(checkPassword(pwd) && pwd == repeatpwd){
-                    var data = { 
+                if(checkPassword(pwd) && pwd === repeatpwd){
+                    blockView();
+                    const data = {
                         email: email, 
                         password: pwd,
                         bufferSize: 10,
@@ -101,11 +105,20 @@
                         contentType: 'application/json',
                         data: JSON.stringify(data),
                         success: function(response){
+                            unblockView();
                             if(response.hasOwnProperty("error")){
                                 Templates.Modals.displayModal(createMessageModal("Error",response.error, "signUpErrorModal"));
                                 return false;
                             } else {
-                                Templates.Modals.displayModal(createMessageModal("Welcome !","Well registered, now check your email to active your account !", "signUpSuccessModal"));
+                                Templates.Modals.displayModal(Templates.Modals.createModal(
+                                    "Welcome !",
+                                    "Well registered, now check your mailbox to activate your account!",
+                                    "signUpSuccessModal",
+                                    [
+                                        ['Ok', () => location.assign('/')]
+                                    ],
+                                    () => location.assign('/')
+                                ));
                             }
                         }
                     });
