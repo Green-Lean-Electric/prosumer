@@ -26,7 +26,7 @@ exports.insertProsumer = function (data) {
     var registrationToken = generateToken();
     data.registrationToken = registrationToken;
 
-    return database.find(undefined, databaseName, collectionName, {"email": data.email})
+    return database.find(databaseName, collectionName, {"email": data.email})
         .then((results) => {
             if (results.length >= 1) {
                 console.log("This email is already used.");
@@ -41,7 +41,7 @@ exports.insertProsumer = function (data) {
                 );
 
                 return database
-                    .insertOne(undefined, databaseName, collectionName, data);
+                    .insertOne(databaseName, collectionName, data);
             }
         });
 
@@ -54,7 +54,7 @@ exports.accountVerification = function (registrationToken) {
     const updateOperation = {$unset: {"registrationToken": ""}};
 
     return database
-        .updateOne(undefined, databaseName, collectionName, {registrationToken}, updateOperation)
+        .updateOne(databaseName, collectionName, {registrationToken}, updateOperation)
         .then((nModified) => {
             if (nModified !== 0) {
                 console.log(`User activated'`);
@@ -71,7 +71,7 @@ exports.connectProsumer = function (data) {
     const collectionName = 'prosumers';
     data.password = hashPassword(data.password);
 
-    return database.find(undefined, databaseName, collectionName, data)
+    return database.find(databaseName, collectionName, data)
         .then((results) => {
             if (results.length === 1) {
                 return results[0];
@@ -90,7 +90,7 @@ exports.connectProsumer = function (data) {
                 const updateOperation = {$set: {token}};
 
                 return database
-                    .updateOne(undefined, databaseName, collectionName, data, updateOperation)
+                    .updateOne(databaseName, collectionName, data, updateOperation)
                     .then((nModified) => {
                         if (nModified !== 0) {
                             console.log(`User connected with token '${token}'`);
@@ -115,7 +115,7 @@ exports.disconnectProsumer = function (token) {
     const updateOperation = {$set: {token: null}};
 
     return database
-        .updateOne(undefined, databaseName, collectionName, prosumer, updateOperation)
+        .updateOne(databaseName, collectionName, prosumer, updateOperation)
         .then(() => {
             console.log(`User connected with token '${token}' has been disconnected`);
             return token;
@@ -142,7 +142,7 @@ exports.updateData = function (data) {
         };
 
     return database
-        .updateOne(undefined, databaseName, collectionName, {token}, updateOperation)
+        .updateOne(databaseName, collectionName, {token}, updateOperation)
         .then((nModified) => {
             if (nModified !== 0) {
                 return true;
@@ -161,7 +161,7 @@ exports.getProsumerLogged = function (token) {
     };
 
     return database
-        .find(undefined, databaseName, collectionName, prosumer)
+        .find(databaseName, collectionName, prosumer)
         .then((results) => {
             if (results.length === 1) {
                 delete results[0].password;
@@ -189,7 +189,7 @@ exports.uploadProsumerPicture = function (data, picturePath) {
 
     return server.moveFile(picturePath, newPath)
         .then(() => database
-            .updateOne(undefined, databaseName, collectionName, prosumer, {$set: {picture: newPath}})
+            .updateOne(databaseName, collectionName, prosumer, {$set: {picture: newPath}})
             .then(() => server.readFile(newPath)));
 };
 
@@ -201,7 +201,7 @@ exports.retrieveProsumerPicturePath = function (token) {
     };
 
     return database
-        .find(undefined, databaseName, collectionName, prosumer)
+        .find(databaseName, collectionName, prosumer)
         .then((results) => {
             return results[0].picture;
         })
@@ -222,7 +222,7 @@ exports.getProsumerElectricityConsumption = function (token) {
     };
 
     return database
-        .find(undefined, databaseName, collectionName, prosumertoken)
+        .find(databaseName, collectionName, prosumertoken)
         .then((results) => {
             if (results.length !== 0) {
                 const prosumerId = results[0].email;
