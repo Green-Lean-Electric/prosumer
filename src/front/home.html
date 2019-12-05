@@ -504,16 +504,9 @@
                 sendRequests();
         }, 10000);
 
+
         $('#logout').on('click', function () {
-            $.ajax({
-                type: 'GET',
-                url: '/prosumerLogout?token=' + window.localStorage.getItem('token'),
-                dataType: 'json',
-                contentType: 'application/json',
-                success: function () {
-                    Templates.Modals.displayModal($('#loggedOutModal'));
-                }
-            });
+            sendLogoutForm("prosumer");
         });
 
         $('#newPicture').change(function () {
