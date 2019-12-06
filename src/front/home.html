@@ -613,16 +613,14 @@
             $('#consumptionRatioBuffer').val(consumptionRatioBuffer * 100);
             $('#consumptionRatioMarket').val(consumptionRatioMarket * 100);
 
-            $('#netProduction').html(round(netProduction) + " kwh");
-
             var addToBuffer = drawProductionPieChart(productionRatioBuffer, productionRatioMarket, electricityConsumption[0].electricityConsumption, electricityProduction[0], netProduction);
 
             var removeFromBuffer = drawConsumptionPieChart(consumptionRatioBuffer, consumptionRatioMarket, electricityConsumption[0].electricityConsumption, electricityProduction[0], netProduction);
             console.log(addToBuffer);
             console.log(removeFromBuffer);
             var newBufferFilling = currentBufferFilling + addToBuffer - removeFromBuffer;
-            if (newBufferFilling > 100) {
-                newBufferFilling == 100
+            if (newBufferFilling >= 100) {
+                newBufferFilling = 100;
             }
 
             var data = {
