@@ -534,7 +534,7 @@
                     contentType: 'application/json',
                     data: JSON.stringify(data),
                     success: function (response) {
-                        if (!$.isEmptyObject(JSON.parse(response))) {
+                        if (!$.isEmptyObject(response)) {
                 			Templates.Modals.displayModal(createMessageModal("Messsage","Ratio updated", "ratioUpdatedModal"));
                             sendRequests();
                             $('#closeProductionChartform').click();
@@ -552,7 +552,7 @@
         $('#consumptionChartform').submit(function () {
             var consumptionRatioBuffer = parseFloat(($('#consumptionRatioBuffer').val() == "" ? 0 : $('#consumptionRatioBuffer').val()));
             var consumptionRatioMarket = parseFloat(($('#consumptionRatioMarket').val() == "" ? 0 : $('#consumptionRatioMarket').val()));
-            if ((consumptionRatioBuffer + consumptionRatioMarket) != 100)
+            if ((consumptionRatioBuffer + consumptionRatioMarket) !== 100)
                 Templates.Modals.displayModal(createMessageModal("Error", "The sum must be equal to 100", "consumptionRatioErrorModal"));
             else {
                 var data = {
@@ -568,7 +568,7 @@
                     contentType: 'application/json',
                     data: JSON.stringify(data),
                     success: function (response) {
-                        if (JSON.parse(response)) {
+                        if (response) {
                             Templates.Modals.displayModal(createMessageModal("Messsage","Ratio updated", "ratioUpdatedModal"));
                             sendRequests();
                             $('#closeConsumptionChartform').click();
@@ -619,9 +619,9 @@
             console.log(addToBuffer);
             console.log(removeFromBuffer);
             var newBufferFilling = currentBufferFilling + addToBuffer - removeFromBuffer;
+
             if (newBufferFilling >= 100) {
                 newBufferFilling = 100;
-            }
 
             var data = {
                 bufferFilling: newBufferFilling,
@@ -635,11 +635,7 @@
                 contentType: 'application/json',
                 data: JSON.stringify(data),
                 success: function (response) {
-                    if (JSON.parse(response)) {
-                        return true;
-                    } else {
-                        return false;
-                    }
+                    return !!response;
                 }
             });
 
