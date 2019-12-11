@@ -107,7 +107,7 @@
                                             <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in"
                                                  aria-labelledby="dropdownMenuLink">
                                                 <div class="dropdown-header">Ratio :</div>
-                                                <a class="dropdown-item" href="#" data-target="#editProductionRatio"
+                                                <a id="editProductionRatioBtn" class="dropdown-item" href="#" data-target="#editProductionRatio"
                                                    role="button" data-toggle="modal">Edit</a>
                                             </div>
                                         </div>
@@ -627,7 +627,7 @@
                 bufferFilling: newBufferFilling,
                 token: window.localStorage.getItem('token')
             };
-
+//TODO faire une fonction
             $.ajax({
                 method: 'POST',
                 url: '/updateData',
@@ -635,7 +635,7 @@
                 contentType: 'application/json',
                 data: JSON.stringify(data),
                 success: function (response) {
-                    return !!response;
+                    return response;
                 }
             });
 
@@ -651,8 +651,60 @@
                 if ($.isEmptyObject(prosumer)) {
                     window.location = "index.html";
                 } else {
-                    $('#accountTitle').html("Dashboard - " + prosumer.email);
+                    $('#accountTitle').html("Dashboard - " + prosumer.email);console.log(Date.now() - prosumer.initBlockedTime);console.log(prosumer.blockedTime);
+                    if(prosumer.hasOwnProperty('initBlockedTime') && prosumer.initBlockedTime != null){
+                        if(Date.now() - prosumer.initBlockedTime <= prosumer.blockedTime){
+                                Templates.Modals.displayModal(createMessageModal("Messsage","You're blocked", "prosumerBlocked"));
+                            blockProsumer();
+                        } else {
+                            unblockProsumer();
+                        }
+                    } else
+                        unblockProsumer();
                 }
+            }
+        });
+    }
+
+    function unblockProsumer(){
+        $('#editProductionRatioBtn').attr('data-target','#editProductionRatio');
+        $('#editProductionRatioBtn').attr('onclick','');
+
+        var data = {
+            initBlockedTime: null,
+            blockedTime: null,
+            token: window.localStorage.getItem('token')
+        };
+
+        $.ajax({
+            method: 'POST',
+            url: '/updateData',
+            dataType: 'json',
+            contentType: 'application/json',
+            data: JSON.stringify(data),
+            success: function (response) {
+                return response;
+            }
+        });
+    }
+
+    function blockProsumer() {
+        $('#editProductionRatioBtn').attr('data-target','');
+        $('#editProductionRatioBtn').attr('onclick','Templates.Modals.displayModal(createMessageModal("Messsage","You\'re blocked, you cannot sell on the market.", "prosumerBlocked"))');
+        var data = {
+            productionRatioMarket: 0,
+            productionRatioBuffer: 1,
+            token: window.localStorage.getItem('token')
+        };
+
+        $.ajax({
+            method: 'POST',
+            url: '/updateData',
+            dataType: 'json',
+            contentType: 'application/json',
+            data: JSON.stringify(data),
+            success: function (response) {
+                return response;
             }
         });
     }
