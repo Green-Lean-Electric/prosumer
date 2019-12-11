@@ -13,6 +13,7 @@ const routes = {
         '/prosumerLogout': (request, parameters) => service.disconnectProsumer(parameters.token),
         '/getProsumerElectricityConsumption': (request, parameters) => service.getProsumerElectricityConsumption(parameters.token),
         '/getProsumerLogged': (request, parameters) => service.getProsumerLogged(parameters.token),
+        '/getCurrentElectricityPrice': (request,parameters) => service.getCurrentElectricityPrice(parameters.token),
         '/uploadPicture': (_, [parameters, picturePath]) => service.uploadProsumerPicture(parameters, picturePath),
         '/retrievePicture': (request, parameters, res) => service.retrieveProsumerPicturePath(parameters.token)
             .then(path => server.serveStaticFile(path, res)),

@@ -686,11 +686,11 @@
     function getCurrentElectricityPrice() {
         return $.ajax({
             method: 'GET',
-            url: `http://${getDomain()}:8080/getCurrentElectricityPrice`,
+            url: '/getCurrentElectricityPrice?token=' + window.localStorage.getItem('token'),
             dataType: 'json',
             success: function (response) {
                 if (response) {
-                    $('#currentPrice').html(response.currentElectricityPrice + " SEK/kwh");
+                    $('#currentPrice').html(response + " SEK/kwh");
                 }
             }
         });

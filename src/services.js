@@ -172,6 +172,31 @@ exports.getProsumerLogged = function (token) {
         });
 };
 
+exports.getCurrentElectricityPrice = function (token) {
+    const databaseName = DATABASE_NAME;
+    var collectionName = 'prosumers';
+    const prosumer = {
+        token
+    };
+
+    return database
+        .find(databaseName, collectionName, prosumer)
+        .then((results) => {
+            return results;
+        }).then((results) => {
+            if (results.length === 1) {
+                collectionName = 'managers';
+                return database
+                    .find(databaseName, collectionName, {})
+                    .then((manager) => {
+                        return manager[0].marketPrice;
+                    });
+            }
+            return {};
+
+        });
+};
+
 exports.uploadProsumerPicture = function (data, picturePath) {
     const databaseName = DATABASE_NAME;
     const collectionName = 'prosumers';
