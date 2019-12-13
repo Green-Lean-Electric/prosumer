@@ -141,6 +141,39 @@ exports.updateData = function (data) {
         });
 };
 
+exports.updateMarket = function (data) {
+    const databaseName = DATABASE_NAME;
+    var collectionName = 'prosumers';
+
+    var token = data.token;
+
+    return database.find(databaseName, collectionName, {token})
+        .then((results) => {
+
+            if (results.length === 1) {
+
+                collectionName = 'managers';
+
+                var updateOperation = {
+                    $set: {
+                        marketQuantityAvailable: data.newMarketQuantity
+                    }
+                };
+
+                return database
+                    .updateOne(databaseName, collectionName, {}, updateOperation)
+                    .then((nModified) => {
+                        if (nModified !== 0) {
+                            return true;
+                        } else {
+                            return {};
+                        }
+                });
+            }
+            return {};
+    });
+};
+
 exports.getProsumerLogged = function (token) {
     const databaseName = DATABASE_NAME;
     const collectionName = 'prosumers';
@@ -178,6 +211,32 @@ exports.getCurrentElectricityPrice = function (token) {
                     .find(databaseName, collectionName, {})
                     .then((manager) => {
                         return manager[0].marketPrice;
+                    });
+            }
+            return {};
+
+        });
+};
+
+
+exports.getCurrentMarketAvailable = function (token) {
+    const databaseName = DATABASE_NAME;
+    var collectionName = 'prosumers';
+    const prosumer = {
+        token
+    };
+
+    return database
+        .find(databaseName, collectionName, prosumer)
+        .then((results) => {
+            return results;
+        }).then((results) => {
+            if (results.length === 1) {
+                collectionName = 'managers';
+                return database
+                    .find(databaseName, collectionName, {})
+                    .then((manager) => {
+                        return manager[0].marketQuantityAvailable;
                     });
             }
             return {};

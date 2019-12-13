@@ -592,10 +592,11 @@
             getProsumerElectricityConsumption(),
             getWindSpeed(),
             getCurrentElectricityPrice(),
-            getElectricityProduction()
-        ).done(function (prosumer, consumption, windSpeed, electricityPrice, electricityProduction) {
+            getElectricityProduction(),
+            getCurrentMarketAvailable()
+        ).done(function (prosumer, consumption, windSpeed, electricityPrice, electricityProduction, marketQuantity) {
             console.log(prosumer);
-
+//electricityProduction[0] = 15;
             var electricityConsumption = consumption[0].electricityConsumption;
             var currentBufferFilling = round(('bufferFilling' in prosumer[0] ? prosumer[0].bufferFilling : 0));
             $('#bufferFilling').html(currentBufferFilling);
@@ -614,7 +615,7 @@
             $('#consumptionRatioBuffer').val(consumptionRatioBuffer * 100);
             $('#consumptionRatioMarket').val(consumptionRatioMarket * 100);
 
-            var data = {
+            var updateData_params = {
                 token: window.localStorage.getItem('token')
             };
 
@@ -623,8 +624,8 @@
             var removeFromBuffer = drawConsumptionPieChart(consumptionRatioBuffer, consumptionRatioMarket, electricityConsumption, electricityProduction[0], netProduction);
 
             if(netProduction < 0 && (consumptionRatioBuffer*electricityConsumption >= currentBufferFilling)){
-                data.consumptionRatioBuffer = 0;
-                data.consumptionRatioMarket = 1;
+                updateData_params.consumptionRatioBuffer = 0;
+                updateData_params.consumptionRatioMarket = 1;
             } else {
 
                 var newBufferFilling = currentBufferFilling + addToBuffer - removeFromBuffer;
@@ -632,8 +633,20 @@
                 if (newBufferFilling >= 100)
                     newBufferFilling = 100;
 
-                data.bufferFilling = newBufferFilling;
+                updateData_params.bufferFilling = newBufferFilling;
             }
+
+            var newMarketQuantity;
+            if (electricityProduction[0] <= electricityConsumption) { // Tout ce que je produit part a ma conso
+                newMarketQuantity = marketQuantity[0] - (consumptionRatioMarket*electricityConsumption);
+            } else { // je produit plus que ma conso ou va le reste ?
+                newMarketQuantity = marketQuantity[0] + (productionRatioMarket*netProduction < 0 ? 0 : productionRatioMarket*netProduction);
+            }
+
+            var updateMarket_params = {
+                token: window.localStorage.getItem('token'),
+                newMarketQuantity: newMarketQuantity
+            };
 
 //TODO faire une fonction
             $.ajax({
@@ -641,7 +654,19 @@
                 url: '/updateData',
                 dataType: 'json',
                 contentType: 'application/json',
-                data: JSON.stringify(data),
+                data: JSON.stringify(updateData_params),
+                success: function (response) {
+                    return response;
+                }
+            });
+
+
+            $.ajax({
+                method: 'POST',
+                url: '/updateMarket',
+                dataType: 'json',
+                contentType: 'application/json',
+                data: JSON.stringify(updateMarket_params),
                 success: function (response) {
                     return response;
                 }
@@ -659,7 +684,7 @@
                 if ($.isEmptyObject(prosumer)) {
                     window.location = "index.html";
                 } else {
-                    $('#accountTitle').html("Dashboard - " + prosumer.email);console.log(Date.now() - prosumer.initBlockedTime);console.log(prosumer.blockedTime);
+                    $('#accountTitle').html("Dashboard - " + prosumer.email);
                     if(prosumer.hasOwnProperty('initBlockedTime') && prosumer.initBlockedTime != null){
                         if(Date.now() - prosumer.initBlockedTime <= prosumer.blockedTime){
                                 Templates.Modals.displayModal(createMessageModal("Messsage","You're blocked", "prosumerBlocked"));
@@ -752,6 +777,17 @@
                 if (response) {
                     $('#currentPrice').html(response + " SEK/kwh");
                 }
+            }
+        });
+    }
+
+    function getCurrentMarketAvailable() {
+        return $.ajax({
+            method: 'GET',
+            url: '/getCurrentMarketAvailable?token=' + window.localStorage.getItem('token'),
+            dataType: 'json',
+            success: function (response) {
+                console.log(response);
             }
         });
     }
