@@ -593,14 +593,15 @@
             getWindSpeed(),
             getCurrentElectricityPrice(),
             getElectricityProduction()
-        ).done(function (prosumer, electricityConsumption, windSpeed, electricityPrice, electricityProduction) {
+        ).done(function (prosumer, consumption, windSpeed, electricityPrice, electricityProduction) {
             console.log(prosumer);
 
+            var electricityConsumption = consumption[0].electricityConsumption;
             var currentBufferFilling = round(('bufferFilling' in prosumer[0] ? prosumer[0].bufferFilling : 0));
             $('#bufferFilling').html(currentBufferFilling);
             $("#bufferFillingBar").width(currentBufferFilling + "%");
 
-            var netProduction = electricityProduction[0] - electricityConsumption[0].electricityConsumption;
+            var netProduction = electricityProduction[0] - electricityConsumption;
             $('#netProduction').html(round(netProduction) + " kwh");
 
             var productionRatioBuffer = prosumer[0].productionRatioBuffer;
@@ -613,20 +614,27 @@
             $('#consumptionRatioBuffer').val(consumptionRatioBuffer * 100);
             $('#consumptionRatioMarket').val(consumptionRatioMarket * 100);
 
-            var addToBuffer = drawProductionPieChart(productionRatioBuffer, productionRatioMarket, electricityConsumption[0].electricityConsumption, electricityProduction[0], netProduction);
-
-            var removeFromBuffer = drawConsumptionPieChart(consumptionRatioBuffer, consumptionRatioMarket, electricityConsumption[0].electricityConsumption, electricityProduction[0], netProduction);
-            console.log(addToBuffer);
-            console.log(removeFromBuffer);
-            var newBufferFilling = currentBufferFilling + addToBuffer - removeFromBuffer;
-
-            if (newBufferFilling >= 100)
-                newBufferFilling = 100;
-
             var data = {
-                bufferFilling: newBufferFilling,
                 token: window.localStorage.getItem('token')
             };
+
+            var addToBuffer = drawProductionPieChart(productionRatioBuffer, productionRatioMarket, electricityConsumption, electricityProduction[0], netProduction);
+
+            var removeFromBuffer = drawConsumptionPieChart(consumptionRatioBuffer, consumptionRatioMarket, electricityConsumption, electricityProduction[0], netProduction);
+
+            if(netProduction < 0 && (consumptionRatioBuffer*electricityConsumption >= currentBufferFilling)){
+                data.consumptionRatioBuffer = 0;
+                data.consumptionRatioMarket = 1;
+            } else {
+
+                var newBufferFilling = currentBufferFilling + addToBuffer - removeFromBuffer;
+
+                if (newBufferFilling >= 100)
+                    newBufferFilling = 100;
+
+                data.bufferFilling = newBufferFilling;
+            }
+
 //TODO faire une fonction
             $.ajax({
                 method: 'POST',
