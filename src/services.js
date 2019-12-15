@@ -114,20 +114,22 @@ exports.updateData = function (data) {
     const databaseName = DATABASE_NAME;
     const collectionName = 'prosumers';
 
-    var token = data.token;
+    const token = data.token;
     delete data.token;
 
     var updateOperation;
-    if (data.length > 1)
+    if (data.length > 1) {
         updateOperation = {
             $set: {
                 data
             }
         };
-    else
+    }
+    else {
         updateOperation = {
             $set: data
         };
+    }
 
     return database
         .updateOne(databaseName, collectionName, {token}, updateOperation)
@@ -218,7 +220,6 @@ exports.getCurrentElectricityPrice = function (token) {
         });
 };
 
-
 exports.getCurrentMarketAvailable = function (token) {
     const databaseName = DATABASE_NAME;
     var collectionName = 'prosumers';
@@ -291,6 +292,10 @@ exports.getProsumerElectricityConsumption = function (token) {
 
     const prosumertoken = {
         token
+    };
+
+    return {
+        electricityConsumption: 10000000
     };
 
     return database
