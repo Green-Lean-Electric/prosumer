@@ -599,11 +599,11 @@
 //electricityProduction[0] = 15;
             var electricityConsumption = consumption[0].electricityConsumption;
             var currentBufferFilling = round(('bufferFilling' in prosumer[0] ? prosumer[0].bufferFilling : 0));
-            $('#bufferFilling').html(currentBufferFilling);
+            $('#bufferFilling').html(currentBufferFilling  + " %");
             $("#bufferFillingBar").width(currentBufferFilling + "%");
 
             var netProduction = electricityProduction[0] - electricityConsumption;
-            $('#netProduction').html(round(netProduction) + " kwh");
+            $('#netProduction').html(round(netProduction) + " W");
 
             var productionRatioBuffer = prosumer[0].productionRatioBuffer;
             var productionRatioMarket = prosumer[0].productionRatioMarket;
@@ -749,7 +749,7 @@
             dataType: 'json',
             success: function (response) {
                 if (!$.isEmptyObject(response)) {
-                    $('#currentConsumption').html(round(response.electricityConsumption) + " kwh");
+                    $('#currentConsumption').html(round(response.electricityConsumption) + " W");
                 }
             }
         });
@@ -799,7 +799,7 @@
             dataType: 'json',
             success: function (response) {
                 if (response !== false) {
-                    $('#currrentProduction').html(response + " kw");
+                    $('#currrentProduction').html(response + " W");
                 }
             }
         });
