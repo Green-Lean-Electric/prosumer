@@ -592,9 +592,7 @@
         getCurrentElectricityPrice();
         $.when(
             getProsumerLogged(),
-            getCurrentMarketAvailable()
-        ).done(function (prosumer, marketQuantity) {
-            prosumer = prosumer[0];
+        ).done(function (prosumer) {
             console.log(prosumer);
 
             const electricityConsumption = prosumer.consumption;
@@ -699,7 +697,7 @@
             dataType: 'json',
             success: function (response) {
                 if (response) {
-                    $('#currentPrice').html(response + " SEK/kwh");
+                    $('#currentPrice').html(response.actualPrice + " SEK/kwh");
                 }
             }
         });
