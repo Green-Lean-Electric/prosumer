@@ -107,7 +107,8 @@
                                             <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in"
                                                  aria-labelledby="dropdownMenuLink">
                                                 <div class="dropdown-header">Ratio :</div>
-                                                <a id="editProductionRatioBtn" class="dropdown-item" href="#" data-target="#editProductionRatio"
+                                                <a id="editProductionRatioBtn" class="dropdown-item" href="#"
+                                                   data-target="#editProductionRatio"
                                                    role="button" data-toggle="modal">Edit</a>
                                             </div>
                                         </div>
@@ -378,7 +379,8 @@
             <div class="modal-body">Select "Logout" below if you are ready to end your current session.</div>
             <div class="modal-footer">
                 <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
-                <a class="btn btn-primary" id="logout" data-dismiss="modal" style="color: #fff;cursor:pointer;">Logout</a>
+                <a class="btn btn-primary" id="logout" data-dismiss="modal"
+                   style="color: #fff;cursor:pointer;">Logout</a>
             </div>
         </div>
     </div>
@@ -519,7 +521,7 @@
             var productionRatioBuffer = parseFloat(($('#productionRatioBuffer').val() == "" ? 0 : $('#productionRatioBuffer').val()));
             var productionRatioMarket = parseFloat(($('#productionRatioMarket').val() == "" ? 0 : $('#productionRatioMarket').val()));
             if ((productionRatioBuffer + productionRatioMarket) !== 100)
-                Templates.Modals.displayModal(createMessageModal("Error","The sum must be equal to 100", "productionRatioErrorModal"));
+                Templates.Modals.displayModal(createMessageModal("Error", "The sum must be equal to 100", "productionRatioErrorModal"));
             else {
                 var data = {
                     productionRatioBuffer: productionRatioBuffer / 100,
@@ -535,12 +537,12 @@
                     data: JSON.stringify(data),
                     success: function (response) {
                         if (!$.isEmptyObject(response)) {
-                			Templates.Modals.displayModal(createMessageModal("Messsage","Ratio updated", "ratioUpdatedModal"));
+                            Templates.Modals.displayModal(createMessageModal("Messsage", "Ratio updated", "ratioUpdatedModal"));
                             sendRequests();
                             $('#closeProductionChartform').click();
                             return true;
                         } else {
-                        	Templates.Modals.displayModal(createMessageModal("Error","Ratio not updated because of an error or because these values are the current ones", "ratioNotUpdatedModal"));
+                            Templates.Modals.displayModal(createMessageModal("Error", "Ratio not updated because of an error or because these values are the current ones", "ratioNotUpdatedModal"));
                             return false;
                         }
                     }
@@ -569,12 +571,12 @@
                     data: JSON.stringify(data),
                     success: function (response) {
                         if (response) {
-                            Templates.Modals.displayModal(createMessageModal("Messsage","Ratio updated", "ratioUpdatedModal"));
+                            Templates.Modals.displayModal(createMessageModal("Messsage", "Ratio updated", "ratioUpdatedModal"));
                             sendRequests();
                             $('#closeConsumptionChartform').click();
                             return true;
                         } else {
-                        	Templates.Modals.displayModal(createMessageModal("Error","Ratio not updated because of an error or because these values are the current ones", "ratioNotUpdatedModal"));
+                            Templates.Modals.displayModal(createMessageModal("Error", "Ratio not updated because of an error or because these values are the current ones", "ratioNotUpdatedModal"));
                             return false;
                         }
                     }
@@ -587,91 +589,37 @@
     });
 
     function sendRequests() {
+        getCurrentElectricityPrice();
         $.when(
             getProsumerLogged(),
-            getProsumerElectricityConsumption(),
-            getWindSpeed(),
-            getCurrentElectricityPrice(),
-            getElectricityProduction(),
-            getCurrentMarketAvailable()
-        ).done(function (prosumer, consumption, windSpeed, electricityPrice, electricityProduction, marketQuantity) {
+        ).done(function (prosumer) {
             console.log(prosumer);
-//electricityProduction[0] = 15;
-            var electricityConsumption = consumption[0].electricityConsumption;
-            var currentBufferFilling = round(('bufferFilling' in prosumer[0] ? prosumer[0].bufferFilling : 0));
-            $('#bufferFilling').html(currentBufferFilling  + " %");
+
+            const electricityConsumption = prosumer.consumption;
+            const currentBufferFilling = round(prosumer.bufferFilling * 100 / prosumer.bufferSize);
+            $('#bufferFilling').html(currentBufferFilling + " %");
             $("#bufferFillingBar").width(currentBufferFilling + "%");
 
-            var netProduction = electricityProduction[0] - electricityConsumption;
+            $('#currentWind').html(prosumer.windSpeed + " km/h");
+            $('#currrentProduction').html(prosumer.production + " W");
+            $('#currentConsumption').html(round(prosumer.consumption) + " W");
+
+            const netProduction = prosumer.production - electricityConsumption;
             $('#netProduction').html(round(netProduction) + " W");
 
-            var productionRatioBuffer = prosumer[0].productionRatioBuffer;
-            var productionRatioMarket = prosumer[0].productionRatioMarket;
-            var consumptionRatioBuffer = prosumer[0].consumptionRatioBuffer;
-            var consumptionRatioMarket = prosumer[0].consumptionRatioMarket;
+            const productionRatioBuffer = prosumer.productionRatioBuffer;
+            const productionRatioMarket = prosumer.productionRatioMarket;
+            const consumptionRatioBuffer = prosumer.consumptionRatioBuffer;
+            const consumptionRatioMarket = prosumer.consumptionRatioMarket;
 
             $('#productionRatioBuffer').val(productionRatioBuffer * 100);
             $('#productionRatioMarket').val(productionRatioMarket * 100);
             $('#consumptionRatioBuffer').val(consumptionRatioBuffer * 100);
             $('#consumptionRatioMarket').val(consumptionRatioMarket * 100);
 
-            var updateData_params = {
-                token: window.localStorage.getItem('token')
-            };
 
-            var addToBuffer = drawProductionPieChart(productionRatioBuffer, productionRatioMarket, electricityConsumption, electricityProduction[0], netProduction);
-
-            var removeFromBuffer = drawConsumptionPieChart(consumptionRatioBuffer, consumptionRatioMarket, electricityConsumption, electricityProduction[0], netProduction);
-
-            if(netProduction < 0 && (consumptionRatioBuffer*electricityConsumption >= currentBufferFilling)){
-                updateData_params.consumptionRatioBuffer = 0;
-                updateData_params.consumptionRatioMarket = 1;
-            } else {
-
-                var newBufferFilling = currentBufferFilling + addToBuffer - removeFromBuffer;
-
-                if (newBufferFilling >= 100)
-                    newBufferFilling = 100;
-
-                updateData_params.bufferFilling = newBufferFilling;
-            }
-
-            var newMarketQuantity;
-            if (electricityProduction[0] <= electricityConsumption) { // Tout ce que je produit part a ma conso
-                newMarketQuantity = marketQuantity[0] - (consumptionRatioMarket*electricityConsumption);
-            } else { // je produit plus que ma conso ou va le reste ?
-                newMarketQuantity = marketQuantity[0] + (productionRatioMarket*netProduction < 0 ? 0 : productionRatioMarket*netProduction);
-            }
-
-            var updateMarket_params = {
-                token: window.localStorage.getItem('token'),
-                newMarketQuantity: newMarketQuantity
-            };
-
-//TODO faire une fonction
-            $.ajax({
-                method: 'POST',
-                url: '/updateData',
-                dataType: 'json',
-                contentType: 'application/json',
-                data: JSON.stringify(updateData_params),
-                success: function (response) {
-                    return response;
-                }
-            });
-
-
-            $.ajax({
-                method: 'POST',
-                url: '/updateMarket',
-                dataType: 'json',
-                contentType: 'application/json',
-                data: JSON.stringify(updateMarket_params),
-                success: function (response) {
-                    return response;
-                }
-            });
-
+            drawProductionPieChart(productionRatioBuffer, productionRatioMarket, electricityConsumption, prosumer.production, netProduction);
+            drawConsumptionPieChart(consumptionRatioBuffer, consumptionRatioMarket, electricityConsumption, prosumer.production, netProduction);
         });
     }
 
@@ -685,9 +633,9 @@
                     window.location = "index.html";
                 } else {
                     $('#accountTitle').html("Dashboard - " + prosumer.email);
-                    if(prosumer.hasOwnProperty('initBlockedTime') && prosumer.initBlockedTime != null){
-                        if(Date.now() - prosumer.initBlockedTime <= prosumer.blockedTime){
-                                Templates.Modals.displayModal(createMessageModal("Messsage","You're blocked", "prosumerBlocked"));
+                    if (prosumer.hasOwnProperty('initBlockedTime') && prosumer.initBlockedTime != null) {
+                        if (Date.now() - prosumer.initBlockedTime <= prosumer.blockedTime) {
+                            Templates.Modals.displayModal(createMessageModal("Messsage", "You're blocked", "prosumerBlocked"));
                             blockProsumer();
                         } else {
                             unblockProsumer();
@@ -699,9 +647,9 @@
         });
     }
 
-    function unblockProsumer(){
-        $('#editProductionRatioBtn').attr('data-target','#editProductionRatio');
-        $('#editProductionRatioBtn').attr('onclick','');
+    function unblockProsumer() {
+        $('#editProductionRatioBtn').attr('data-target', '#editProductionRatio');
+        $('#editProductionRatioBtn').attr('onclick', '');
 
         var data = {
             initBlockedTime: null,
@@ -722,8 +670,8 @@
     }
 
     function blockProsumer() {
-        $('#editProductionRatioBtn').attr('data-target','');
-        $('#editProductionRatioBtn').attr('onclick','Templates.Modals.displayModal(createMessageModal("Messsage","You\'re blocked, you cannot sell on the market.", "prosumerBlocked"))');
+        $('#editProductionRatioBtn').attr('data-target', '');
+        $('#editProductionRatioBtn').attr('onclick', 'Templates.Modals.displayModal(createMessageModal("Messsage","You\'re blocked, you cannot sell on the market.", "prosumerBlocked"))');
         var data = {
             productionRatioMarket: 0,
             productionRatioBuffer: 1,
@@ -742,32 +690,6 @@
         });
     }
 
-    function getProsumerElectricityConsumption() {
-        return $.ajax({
-            method: 'GET',
-            url: '/getProsumerElectricityConsumption?token=' + window.localStorage.getItem('token'),
-            dataType: 'json',
-            success: function (response) {
-                if (!$.isEmptyObject(response)) {
-                    $('#currentConsumption').html(round(response.electricityConsumption) + " W");
-                }
-            }
-        });
-    }
-
-    function getWindSpeed() {
-        return $.ajax({
-            method: 'GET',
-            url: `http://${getDomain()}:8080/getWindSpeed`,
-            dataType: 'json',
-            success: function (response) {
-                if (response) {
-                    $('#currentWind').html(response.windSpeed + " km/h");
-                }
-            }
-        });
-    }
-
     function getCurrentElectricityPrice() {
         return $.ajax({
             method: 'GET',
@@ -775,7 +697,7 @@
             dataType: 'json',
             success: function (response) {
                 if (response) {
-                    $('#currentPrice').html(response + " SEK/kwh");
+                    $('#currentPrice').html(response.actualPrice + " SEK/kwh");
                 }
             }
         });
@@ -788,19 +710,6 @@
             dataType: 'json',
             success: function (response) {
                 console.log(response);
-            }
-        });
-    }
-
-    function getElectricityProduction() {
-        return $.ajax({
-            method: 'GET',
-            url: `http://${getDomain()}:8080/getElectricityProduction`,
-            dataType: 'json',
-            success: function (response) {
-                if (response !== false) {
-                    $('#currrentProduction').html(response + " W");
-                }
             }
         });
     }
@@ -830,7 +739,7 @@
             pchart_market = (pchart_market_percent * production_rest * 100) / electricityProduction;
         }
 
-        var myPieChart = new Chart(ctx, {
+        new Chart(ctx, {
             type: 'doughnut',
             data: {
                 labels: ["Own Consumption", "Buffer", "Market"],
@@ -859,8 +768,6 @@
                 cutoutPercentage: 80,
             },
         });
-
-        return bufferFilling;
     }
 
     function drawConsumptionPieChart(cchart_buffer_percent, cchart_market_percent, electricityConsumption, electricityProduction, consumption_rest) {
@@ -877,7 +784,6 @@
             cchart_market = 0;
             bufferEmptying = 0;
         } else { //Je produit pas assez pour ma conso
-
             if (cchart_ownProduction <= 0) {
                 consumption_rest = electricityConsumption;
             }
@@ -887,7 +793,7 @@
             cchart_market = (cchart_market_percent * Math.abs(consumption_rest) * 100) / electricityConsumption;
         }
 
-        var myPieChart = new Chart(ctx, {
+        new Chart(ctx, {
             type: 'doughnut',
             data: {
                 labels: ["Own Production", "Buffer", "Market"],
@@ -916,18 +822,16 @@
                 cutoutPercentage: 80,
             },
         });
-
-        return bufferEmptying;
     }
 
     function retrieveProfilePicture() {
         blockView();
         const housePicture = $("#housePicture");
-        housePicture.on('error', function() {
+        housePicture.on('error', function () {
             $(this).hide();
             unblockView();
         });
-        housePicture.on('load', function() {
+        housePicture.on('load', function () {
             $(this).show();
             unblockView();
         });
@@ -955,7 +859,8 @@
             body,
             'editPictureModal',
             [
-                ['Cancel', () => {}],
+                ['Cancel', () => {
+                }],
                 ['Validate', sendPicture]
             ]);
     }
@@ -989,7 +894,8 @@
             contentType: false,
             success: function () {
                 unblockView();
-                Templates.Modals.displayModal(Templates.Modals.createModal('Picture uploaded', 'Your picture has been uploaded!', 'uploadedPictureModal', [['Close', () => {}]]));
+                Templates.Modals.displayModal(Templates.Modals.createModal('Picture uploaded', 'Your picture has been uploaded!', 'uploadedPictureModal', [['Close', () => {
+                }]]));
                 retrieveProfilePicture();
             },
         });

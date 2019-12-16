@@ -114,20 +114,21 @@ exports.updateData = function (data) {
     const databaseName = DATABASE_NAME;
     const collectionName = 'prosumers';
 
-    var token = data.token;
+    const token = data.token;
     delete data.token;
 
     var updateOperation;
-    if (data.length > 1)
+    if (data.length > 1) {
         updateOperation = {
             $set: {
                 data
             }
         };
-    else
+    } else {
         updateOperation = {
             $set: data
         };
+    }
 
     return database
         .updateOne(databaseName, collectionName, {token}, updateOperation)
@@ -168,10 +169,10 @@ exports.updateMarket = function (data) {
                         } else {
                             return {};
                         }
-                });
+                    });
             }
             return {};
-    });
+        });
 };
 
 exports.getProsumerLogged = function (token) {
@@ -203,44 +204,14 @@ exports.getCurrentElectricityPrice = function (token) {
     return database
         .find(databaseName, collectionName, prosumer)
         .then((results) => {
-            return results;
-        }).then((results) => {
             if (results.length === 1) {
-                collectionName = 'managers';
-                return database
-                    .find(databaseName, collectionName, {})
-                    .then((manager) => {
-                        return manager[0].marketPrice;
-                    });
+                return results[0];
             }
-            return {};
-
-        });
-};
-
-
-exports.getCurrentMarketAvailable = function (token) {
-    const databaseName = DATABASE_NAME;
-    var collectionName = 'prosumers';
-    const prosumer = {
-        token
-    };
-
-    return database
-        .find(databaseName, collectionName, prosumer)
-        .then((results) => {
-            return results;
+            else {
+                throw 'No prosumer known';
+            }
         }).then((results) => {
-            if (results.length === 1) {
-                collectionName = 'managers';
-                return database
-                    .find(databaseName, collectionName, {})
-                    .then((manager) => {
-                        return manager[0].marketQuantityAvailable;
-                    });
-            }
-            return {};
-
+            return database.findLast(DATABASE_NAME, 'market', {}, 'date');
         });
 };
 
@@ -277,7 +248,9 @@ exports.retrieveProsumerPicturePath = function (token) {
         .then((results) => {
             return results[0].picture;
         })
-        .catch(() => {return undefined;});
+        .catch(() => {
+            return undefined;
+        });
 };
 
 function generateToken() {
@@ -291,6 +264,10 @@ exports.getProsumerElectricityConsumption = function (token) {
 
     const prosumertoken = {
         token
+    };
+
+    return {
+        electricityConsumption: 10000000
     };
 
     return database
