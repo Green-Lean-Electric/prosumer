@@ -8,7 +8,7 @@ const port = configuration
     .port;
 
 const routes = {
-        '/prosumerSignUp': (request, parameters) => service.insertProsumer(parameters),
+        '/prosumerSignUp': (request, parameters) => service.insertProsumer(parameters.email, parameters.password),
         '/prosumerLogin': (request, parameters) => service.connectProsumer(parameters),
         '/prosumerLogout': (request, parameters) => service.disconnectProsumer(parameters.token),
         '/getProsumerElectricityConsumption': (request, parameters) => service.getProsumerElectricityConsumption(parameters.token),

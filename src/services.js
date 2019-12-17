@@ -8,29 +8,38 @@ const configuration = require('../../utils/src/configuration');
 const DATABASE_NAME = 'greenleanelectrics';
 
 
-exports.insertProsumer = function (data) {
+exports.insertProsumer = function (email, password) {
     const databaseName = DATABASE_NAME;
     const collectionName = 'prosumers';
 
-    var registrationToken = generateToken();
-    data.registrationToken = registrationToken;
+    let prosumer = {
+        email,
+        password,
+        bufferSize: 3000,
+        bufferFilling: 0,
+        productionRatioBuffer : 0.7,
+        productionRatioMarket : 0.3,
+        consumptionRatioBuffer : 0,
+        consumptionRatioMarket : 1,
+        registrationToken: generateToken()
+    };
 
-    return database.find(databaseName, collectionName, {"email": data.email})
+    return database.find(databaseName, collectionName, {'email': email})
         .then((results) => {
             if (results.length >= 1) {
-                console.log("This email is already used.");
-                return {error: "This email is already used."};
+                console.log('This email is already used.');
+                return {error: 'This email is already used.'};
             } else {
                 const url = `${configuration.serversConfiguration.prosumer.hostname}:${configuration.serversConfiguration.prosumer.port}`;
                 server.sendEmail(
                     'no-reply@greenleanelectric.com',
-                    data.email,
+                    email,
                     'Account Verification',//TODO Change url
-                    `To activate your account click on the following link : <a href="http://${url}/accountVerification?registrationToken=${registrationToken}">Click Here</a>`
+                    `To activate your account click on the following link : <a href="http://${url}/accountVerification?registrationToken=${prosumer.registrationToken}">Click Here</a>`
                 );
 
                 return database
-                    .insertOne(databaseName, collectionName, data);
+                    .insertOne(databaseName, collectionName, prosumer);
             }
         });
 
