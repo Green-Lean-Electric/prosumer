@@ -43,6 +43,10 @@
                     </div>
                     <div class="sidebar-brand-text mx-3">Prosumer Account</div>
                 </a>
+                <div id="blackout" class="align-items-center justify-content-center ml-auto text-light" style="display: none;">
+                    <h3>Black Out</h3>
+                </div>
+
                 <!-- Topbar Navbar -->
                 <ul class="navbar-nav ml-auto">
 
@@ -535,8 +539,8 @@
                     dataType: 'json',
                     contentType: 'application/json',
                     data: JSON.stringify(data),
-                    success: function (response) {
-                        if (!$.isEmptyObject(response)) {
+                    success: function (response) {console.log(response);
+                        if (response) {
                             Templates.Modals.displayModal(createMessageModal("Messsage", "Ratio updated", "ratioUpdatedModal"));
                             sendRequests();
                             $('#closeProductionChartform').click();
@@ -594,6 +598,14 @@
             getProsumerLogged(),
         ).done(function (prosumer) {
             console.log(prosumer);
+            if(prosumer.blackOut){
+                $('#blackout').show();
+                $('.navbar')[0].classList.remove('bg-white');
+                $('.navbar')[0].style.backgroundColor = "black";
+            } else {
+                $('#blackout').hide();
+                $('.navbar')[0].classList.add('bg-white');
+            }
 
             const electricityConsumption = prosumer.consumption;
             const currentBufferFilling = Math.floor((prosumer.bufferFilling * 100 / prosumer.bufferSize) *100) / 100.0;
