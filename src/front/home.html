@@ -596,7 +596,7 @@
             console.log(prosumer);
 
             const electricityConsumption = prosumer.consumption;
-            const currentBufferFilling = round(prosumer.bufferFilling * 100 / prosumer.bufferSize);
+            const currentBufferFilling = Math.floor((prosumer.bufferFilling * 100 / prosumer.bufferSize) *100) / 100.0;
             $('#bufferFilling').html(currentBufferFilling + " %");
             $("#bufferFillingBar").width(currentBufferFilling + "%");
 
