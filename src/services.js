@@ -34,7 +34,7 @@ exports.insertProsumer = function (email, password) {
                 server.sendEmail(
                     'no-reply@greenleanelectric.com',
                     email,
-                    'Account Verification',//TODO Change url
+                    'Account Verification',
                     `To activate your account click on the following link : <a href="http://${url}/accountVerification?registrationToken=${prosumer.registrationToken}">Click Here</a>`
                 );
 
@@ -119,25 +119,68 @@ exports.disconnectProsumer = function (token) {
         });
 };
 
-exports.updateData = function (data) {
+exports.updateProductionRatios = function (data) {
     const databaseName = DATABASE_NAME;
     const collectionName = 'prosumers';
 
     const token = data.token;
-    delete data.token;
 
-    var updateOperation;
-    if (data.length > 1) {
-        updateOperation = {
+    var updateOperation = {
             $set: {
-                data
+                productionRatioBuffer: data.productionRatioBuffer,
+                productionRatioMarket: data.productionRatioMarket
             }
         };
-    } else {
-        updateOperation = {
-            $set: data
+
+    return database
+        .updateOne(databaseName, collectionName, {token}, updateOperation)
+        .then((nModified) => {
+            if (nModified !== 0) {
+                return true;
+            } else {
+                console.log(`User not found or data already with the same values`);
+                return {};
+            }
+        });
+};
+
+exports.updateConsumptionRatios = function (data) {
+    const databaseName = DATABASE_NAME;
+    const collectionName = 'prosumers';
+
+    const token = data.token;
+
+    var updateOperation = {
+            $set: {
+                consumptionRatioBuffer: data.consumptionRatioBuffer,
+                consumptionRatioMarket: data.consumptionRatioMarket
+            }
         };
-    }
+
+    return database
+        .updateOne(databaseName, collectionName, {token}, updateOperation)
+        .then((nModified) => {
+            if (nModified !== 0) {
+                return true;
+            } else {
+                console.log(`User not found or data already with the same values`);
+                return {};
+            }
+        });
+};
+
+exports.updateBlockedTime = function (data) {
+    const databaseName = DATABASE_NAME;
+    const collectionName = 'prosumers';
+
+    const token = data.token;
+
+    var updateOperation = {
+            $set: {
+                blockedTime: data.blockedTime,
+                initBlockedTime: data.initBlockedTime
+            }
+        };
 
     return database
         .updateOne(databaseName, collectionName, {token}, updateOperation)

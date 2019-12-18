@@ -529,10 +529,10 @@
                     productionRatioMarket: productionRatioMarket / 100,
                     token: window.localStorage.getItem('token')
                 };
-                // call API
+
                 $.ajax({
                     method: 'POST',
-                    url: '/updateData',
+                    url: '/updateProductionRatios',
                     dataType: 'json',
                     contentType: 'application/json',
                     data: JSON.stringify(data),
@@ -563,10 +563,10 @@
                     consumptionRatioMarket: consumptionRatioMarket / 100,
                     token: window.localStorage.getItem('token')
                 };
-                // call API
+
                 $.ajax({
                     method: 'POST',
-                    url: '/updateData',
+                    url: '/updateConsumptionRatios',
                     dataType: 'json',
                     contentType: 'application/json',
                     data: JSON.stringify(data),
@@ -667,7 +667,7 @@
 
         $.ajax({
             method: 'POST',
-            url: '/updateData',
+            url: '/updateBlockedTime',
             dataType: 'json',
             contentType: 'application/json',
             data: JSON.stringify(data),
@@ -688,7 +688,7 @@
 
         $.ajax({
             method: 'POST',
-            url: '/updateData',
+            url: '/updateProductionRatios',
             dataType: 'json',
             contentType: 'application/json',
             data: JSON.stringify(data),
@@ -723,7 +723,7 @@
     }
 
     function drawProductionPieChart(pchart_buffer_percent, pchart_market_percent, electricityConsumption, electricityProduction, production_rest) {
-        // Pie Charts
+
         var ctx = document.getElementById("ProductionPieChart");
 
         var pchart_ownConsumption = (electricityConsumption * 100) / electricityProduction;
@@ -731,12 +731,12 @@
         var pchart_market;
         var bufferFilling;
 
-        if (electricityProduction <= electricityConsumption) { // Tout ce que je produit par a ma conso
+        if (electricityProduction <= electricityConsumption) { // No more produced electricity after using it for my own consumption
             pchart_ownConsumption = 100;
             pchart_buffer = 0;
             pchart_market = 0;
             bufferFilling = 0;
-        } else { // je produit plus que ma conso ou va le reste ?
+        } else { // I produce more than my own consumption
 
             pchart_buffer = (pchart_buffer_percent * production_rest * 100) / electricityProduction;
             bufferFilling = pchart_buffer_percent * production_rest;
@@ -748,7 +748,7 @@
             data: {
                 labels: ["Own Consumption", "Buffer", "Market"],
                 datasets: [{
-                    data: [round(pchart_ownConsumption), round(pchart_buffer), round(pchart_market)],
+                    data: [round(pchart_ownConsumption, 100), round(pchart_buffer, 100), round(pchart_market, 100)],
                     backgroundColor: ['#1cc88a', '#f6c23e', '#e74a3b'],
                     hoverBackgroundColor: ['#17a673', '#F4B619', '#E02D1B'],
                     hoverBorderColor: "rgba(234, 236, 244, 1)",
@@ -766,16 +766,16 @@
         var cchart_market;
         var bufferEmptying;
 
-        if (cchart_ownProduction >= 100) { // Je produit plus que ce que je consomme
+        if (cchart_ownProduction >= 100) { // I produce more than my own consumption
             cchart_ownProduction = 100;
             cchart_buffer = 0;
             cchart_market = 0;
             bufferEmptying = 0;
-        } else { //Je produit pas assez pour ma conso
+        } else { // I don't produce enough for my own consumption
             if (cchart_ownProduction <= 0) {
                 consumption_rest = electricityConsumption;
             }
-            console.log(consumption_rest);
+
             cchart_buffer = (cchart_buffer_percent * Math.abs(consumption_rest) * 100) / electricityConsumption;
             bufferEmptying = cchart_buffer_percent * Math.abs(consumption_rest);
             cchart_market = (cchart_market_percent * Math.abs(consumption_rest) * 100) / electricityConsumption;
@@ -786,7 +786,7 @@
             data: {
                 labels: ["Own Production", "Buffer", "Market"],
                 datasets: [{
-                    data: [cchart_ownProduction, cchart_buffer, cchart_market],
+                    data: [round(cchart_ownProduction, 100), round(cchart_buffer, 100), round(cchart_market, 100)],
                     backgroundColor: ['#36b9cc', '#f6c23e', '#e74a3b'],
                     hoverBackgroundColor: ['#2C9FAF', '#F4B619', '#E02D1B'],
                     hoverBorderColor: "rgba(234, 236, 244, 1)",
