@@ -194,39 +194,6 @@ exports.updateBlockedTime = function (data) {
         });
 };
 
-exports.updateMarket = function (data) {
-    const databaseName = DATABASE_NAME;
-    var collectionName = 'prosumers';
-
-    var token = data.token;
-
-    return database.find(databaseName, collectionName, {token})
-        .then((results) => {
-
-            if (results.length === 1) {
-
-                collectionName = 'managers';
-
-                var updateOperation = {
-                    $set: {
-                        marketQuantityAvailable: data.newMarketQuantity
-                    }
-                };
-
-                return database
-                    .updateOne(databaseName, collectionName, {}, updateOperation)
-                    .then((nModified) => {
-                        if (nModified !== 0) {
-                            return true;
-                        } else {
-                            return {};
-                        }
-                    });
-            }
-            return {};
-        });
-};
-
 exports.getProsumerLogged = function (token) {
     const databaseName = DATABASE_NAME;
     const collectionName = 'prosumers';
@@ -309,40 +276,6 @@ function generateToken() {
     const crypto = require("crypto");
     return crypto.randomBytes(16).toString("hex");
 }
-
-exports.getProsumerElectricityConsumption = function (token) {
-    const databaseName = 'greenleanelectrics';
-    const collectionName = 'prosumers';
-
-    const prosumertoken = {
-        token
-    };
-
-    return {
-        electricityConsumption: 10000000
-    };
-
-    return database
-        .find(databaseName, collectionName, prosumertoken)
-        .then((results) => {
-            if (results.length !== 0) {
-                const prosumerId = results[0].email;
-                const simulatorServer = require('../../utils/src/configuration')
-                    .serversConfiguration
-                    .simulator;
-
-                const options = {
-                    hostname: simulatorServer.hostname,
-                    port: simulatorServer.port,
-                    path: '/getElectricityConsumption?' + querystring.stringify({prosumerId}),
-                    method: 'GET'
-                };
-
-                return httpRequest(options);
-            }
-            return {};
-        });
-};
 
 function httpRequest(options, postData) {
     return new Promise(function (resolve, reject) {

@@ -11,7 +11,6 @@ const routes = {
         '/signUp': (request, parameters) => service.insertProsumer(parameters.email, parameters.password),
         '/login': (request, parameters) => service.connectProsumer(parameters),
         '/logout': (request, parameters) => service.disconnectProsumer(parameters.token),
-        '/getProsumerElectricityConsumption': (request, parameters) => service.getProsumerElectricityConsumption(parameters.token),
         '/getProsumerLogged': (request, parameters) => service.getProsumerLogged(parameters.token),
         '/getCurrentElectricityPrice': (request, parameters) => service.getCurrentElectricityPrice(parameters.token),
         '/getCurrentMarketAvailable': (request, parameters) => service.getCurrentMarketAvailable(parameters.token),
@@ -21,11 +20,8 @@ const routes = {
         '/updateProductionRatios': (request, parameters) => service.updateProductionRatios(parameters),
         '/updateConsumptionRatios': (request, parameters) => service.updateConsumptionRatios(parameters),
         '/updateBlockedTime': (request, parameters) => service.updateBlockedTime(parameters),
-        '/updateMarket': (request, parameters) => service.updateMarket(parameters),
         '/accountVerification': (request, parameters, res) => service.accountVerification(parameters.registrationToken)
-            .then(path => server.serveStaticFile(path, res)),
-        '/blackout': (request, parameters, res) => {
-        }    // TODO
+            .then(path => server.serveStaticFile(path, res))
     }
 ;
 
