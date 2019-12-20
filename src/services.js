@@ -24,7 +24,7 @@ exports.insertProsumer = function (email, password) {
         registrationToken: generateToken()
     };
 
-    return database.find(databaseName, collectionName, {'email': email})
+    return database.find(databaseName, collectionName, {email: email})
         .then((results) => {
             if (results.length >= 1) {
                 console.log('This email is already used.');
@@ -75,8 +75,6 @@ exports.connectProsumer = function (data) {
             }
             return {};
         }).then((results) => {
-
-            console.log(results);
 
             if (!Object.keys(results).length)
                 return {error: "Login was unsuccessful, please check your email and password"};

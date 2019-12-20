@@ -536,7 +536,7 @@
                     dataType: 'json',
                     contentType: 'application/json',
                     data: JSON.stringify(data),
-                    success: function (response) {console.log(response);
+                    success: function (response) {
                         if (response) {
                             Templates.Modals.displayModal(createMessageModal("Messsage", "Ratio updated", "ratioUpdatedModal"));
                             sendRequests();
@@ -707,17 +707,6 @@
                 if (response) {
                     $('#currentPrice').html(response.actualPrice + " SEK/kwh");
                 }
-            }
-        });
-    }
-
-    function getCurrentMarketAvailable() {
-        return $.ajax({
-            method: 'GET',
-            url: '/getCurrentMarketAvailable?token=' + window.localStorage.getItem('token'),
-            dataType: 'json',
-            success: function (response) {
-                console.log(response);
             }
         });
     }
