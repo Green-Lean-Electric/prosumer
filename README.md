@@ -1,41 +1,57 @@
-# Prosumer
+# Prosumer Project
 
-Basic functionality
+The Prosumer project includes the interface and API for the users of the simulator of the Green Lean Electrics Project (```https://github.com/Green-Lean-Electric```). 
+Prosumer are producing electricity thanks to a small wind turbine and they also consume some electricity. Thanks to this interface they can see their production and consumption and also check the price of the electricity on the market.
 
-In this assignment you will build a web app for the Prosumer in which he/she can view and control the different aspects of his/her electricity production and consumption. The application must be secured with a login in order to prevent non-authorized persons from controlling the Prosumer’s system. In the most basic form, a Prosumer should be able to:
+## Online Usage
 
-Sign up, login, and logout (make sure to apply proper security principles)
-See the following (as text): 
-the current wind
-current production
-current consumption
-net production (i.e. the current production minus the current consumption)
-how much is in the buffer
-current electricity price on the market
-In case of excessive production, Prosumer should be able to control the ratio of how much should be sold to the market and how much should be sent to the buffer
-In case of under-production, control the ratio of how much should be bought from the market and how much should be taken from the buffer
-The Prosumer can read values from the simulator, and values should be sampled at a rate of 0.1 Hz or higher
-Should be able to upload a picture of the Prosumer’s house (that is then visible in the application)
- 
+You can use our project on our serveur with the following links :
 
-Advanced functionality
+Manager ```http://145.239.75.80:8082/```
 
-Here are some suggestions in order to obtain a higher grade:
+Prosumer ```http://145.239.75.80:8081/``` 
 
-The monitoring panel can be made more user-friendly by for example including gauges for displaying:
-Consumption
-Wind speed
-Sliders or other suitable controls for determining the ratio from/to the market and buffer
-A chat where messages from system administrators or friends can be displayed
-The monitoring system should be responsive (e.g. have a mobile view)
-The monitoring system should handle multiple logins (e.g. one from mobile, one from desktop)
-There should be a profile page where the Prosumer can update credentials and delete his/her account
-Messages in the chat has a priority and filters for low, medium, high. High priority messages issues a special notification to the user (e.g. a sound, pop-up etc). 
-The messages in the chat must not suffer from XSS vulnerabilities etc.
-The Prosumer can re-order the visual gauges for example using drag-n-drop
-The data stream from the simulator is made “real time” i.e. streaming from the simulator
-The Prosumer can add “Warning level thresholds” that issues notifications when for example the Battery buffer drops below a certain value
-Have a “friends” list of other Prosumer’s which they are allowed to interact with (e.g. see their information etc)
-Push-to-talk button for contacting the Manager or friends over voice
-Analyze QoS for response times etc. Issue warnings if the server responds slowly or even implement dead reckoning or similar to cope with server downtimes
-The Prosumer’s application should be hosted by a web server (e.g. NodeJS) that is configured to run on the provided virtual machine. It must respond to incoming web requests on a specific IP and port. At least three views should be created: one page for registration, one for login, and one for the monitoring panel.
+## Installation
+
+Download and install Node.js version 12 or higher. Lower versions may not work due to advanced JavaScript features. 
+
+Download and install on localhost MongoDB version 4 or higher. Default port should be 27017.
+
+Clone all projects repositories (Simulator, Prosumer, Manager & Utils)
+
+Inside each project run 
+
+```bash
+npm install
+```
+This should install Node.js dependencies we have used throughout our application.
+
+
+## Usage
+
+You can now start the three main projects. From the root folder, launch the following commands:
+
+
+```bash
+node simulator/src/server.js
+node manager/src/server.js
+node prosumer/src/server.js
+```
+
+The servers should now be up and running and you should be able to access to your web interfaces at "localhost:8081" (prosumer interface) and "localhost:8082" (manager interface).
+
+Please note that if you test our application on a Windows computer, the registration mails can't be send. We recommend you to test it on a Unix computer. 
+
+However, if you only have a Windows computer, you need a few more steps to activate an account (manager & prosumer) after its registration:
+
+- open your localhost MongoDB "greenleanelectrics" database.
+- look for the prosumer (collection "prosumer") or the manager (collection "manager") you want to activate.
+- delete the "registrationToken" field.
+
+## Other Projects Linked to this one
+
+Simulator ```https://github.com/Green-Lean-Electric/simulator```
+
+Manager ```https://github.com/Green-Lean-Electric/manager```
+
+Utils ```https://github.com/Green-Lean-Electric/utils```
